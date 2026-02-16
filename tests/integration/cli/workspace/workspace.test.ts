@@ -607,6 +607,19 @@ describe('workspace projects', () => {
     expect(stderr).toContain('index 0');
   });
 
+  test('build should error when --project negation filter is only "!"', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(['build', '--project', '!'], {
+      cwd: fixturePath,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('empty negation pattern');
+    expect(stderr).toContain('index 0');
+  });
+
   test('build should error when mixed project filters match nothing', async () => {
     const fixturePath = __dirname;
 

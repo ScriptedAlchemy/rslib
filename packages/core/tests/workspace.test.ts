@@ -394,7 +394,7 @@ describe('workspace projects resolver', () => {
       config: {
         projects: ['packages/*'],
       },
-      projectFilters: ['@scope/*', '!  @scope/legacy  '],
+      projectFilters: ['@scope/*', '  !@scope/legacy  '],
     });
 
     expect(filteredProjects.map((project) => project.name)).toEqual([
@@ -424,7 +424,7 @@ describe('workspace projects resolver', () => {
       config: {
         projects: ['packages/*'],
       },
-      projectFilters: ['@scope/*', '!  @scope/legacy  '],
+      projectFilters: ['@scope/*', '!   @scope/legacy'],
     });
 
     expect(filteredProjects.map((project) => project.name)).toEqual([
@@ -515,7 +515,7 @@ describe('workspace projects resolver', () => {
         config: {
           projects: ['packages/*'],
         },
-        projectFilters: ['@scope/app', '!   '],
+        projectFilters: ['@scope/app', '!'],
       }),
     ).rejects.toThrowError('empty negation pattern');
     await expect(() =>
@@ -524,7 +524,7 @@ describe('workspace projects resolver', () => {
         config: {
           projects: ['packages/*'],
         },
-        projectFilters: ['@scope/app', '!   '],
+        projectFilters: ['@scope/app', '!'],
       }),
     ).rejects.toThrowError('index 1');
   });
