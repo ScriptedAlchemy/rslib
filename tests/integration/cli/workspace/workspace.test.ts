@@ -348,6 +348,7 @@ describe('workspace projects', () => {
     expect(stderr).toContain('to be a string path or glob');
     expect(stderr).toContain('received number');
     expect(stderr).toContain('index 1');
+    expect(stderr).toContain('rslib.config.invalidProjectsEntry.ts');
   });
 
   test('should error for invalid workspace projects type', async () => {
@@ -509,6 +510,25 @@ describe('workspace projects', () => {
     expect(stderr).toContain('to be a string path or glob');
     expect(stderr).toContain('received number');
     expect(stderr).toContain('index 1');
+    expect(stderr).toContain('rslib.config.invalidProjectsEntry.ts');
+  });
+
+  test('mf-dev should error for non-string workspace project entries', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.invalidProjectsEntry.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('to be a string path or glob');
+    expect(stderr).toContain('received number');
+    expect(stderr).toContain('index 1');
+    expect(stderr).toContain('rslib.config.invalidProjectsEntry.ts');
   });
 
   test('should error for empty workspace project entries', async () => {
@@ -524,6 +544,7 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('at least one non-empty project path or glob');
+    expect(stderr).toContain('rslib.config.emptyProjectsEntry.ts');
   });
 
   test('inspect should error for empty workspace project entries', async () => {
@@ -539,6 +560,23 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('at least one non-empty project path or glob');
+    expect(stderr).toContain('rslib.config.emptyProjectsEntry.ts');
+  });
+
+  test('mf-dev should error for empty workspace project entries', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.emptyProjectsEntry.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('at least one non-empty project path or glob');
+    expect(stderr).toContain('rslib.config.emptyProjectsEntry.ts');
   });
 
   test('should error when a workspace project has no rslib config', async () => {
