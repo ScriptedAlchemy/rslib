@@ -73,6 +73,46 @@ describe('workspace projects resolver', () => {
     expect(projects.map((project) => project.name)).toEqual(['@scope/nested']);
   });
 
+  test('supports project entries as explicit config file paths', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const projects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: ['packages/app/rslib.config.mjs'],
+      },
+    });
+
+    expect(projects.map((project) => project.name)).toEqual(['@scope/app']);
+    expect(projects[0]?.configFilePath).toContain(
+      'packages/app/rslib.config.mjs',
+    );
+  });
+
+  test('supports absolute directory paths in projects entries', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const absoluteProjectPath = path.join(workspaceRoot, 'packages/shared');
+    const projects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: [absoluteProjectPath],
+      },
+    });
+
+    expect(projects.map((project) => project.name)).toEqual(['@scope/shared']);
+  });
+
   test('filters projects and can include local dependencies', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/shared/package.json': JSON.stringify({
