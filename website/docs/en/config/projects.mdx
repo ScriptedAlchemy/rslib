@@ -81,6 +81,7 @@ When filtering projects:
 - `rslib inspect --project ...` only inspects the selected projects.
 
 So if a selected project depends on another local project, that dependency will still be built even if it is excluded by a negation pattern.
+If filters match no projects, Rslib reports the filter miss and prints available workspace project names to help you pick valid values.
 
 ## Notes
 
