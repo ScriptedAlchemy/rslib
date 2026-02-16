@@ -179,4 +179,19 @@ describe('workspace projects', () => {
       'The "mf-dev" command does not support workspace projects mode yet',
     );
   });
+
+  test('should error for mixed workspace and lib root config', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.mixed.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('cannot be used together');
+  });
 });
