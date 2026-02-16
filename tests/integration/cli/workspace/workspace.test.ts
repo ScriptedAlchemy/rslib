@@ -365,6 +365,21 @@ describe('workspace projects', () => {
     expect(stderr).toContain('Expect "projects" to be a non-empty array');
   });
 
+  test('inspect should error for invalid workspace projects type', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.invalidProjectsType.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Expect "projects" to be a non-empty array');
+  });
+
   test('inspect should error for non-string workspace project entries', async () => {
     const fixturePath = __dirname;
 
