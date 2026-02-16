@@ -256,11 +256,12 @@ export const filterProjects = (
       return trimmedFilter;
     },
   );
+  const uniqueProjectFilters = Array.from(new Set(normalizedProjectFilters));
 
-  const positivePatterns = normalizedProjectFilters.filter(
+  const positivePatterns = uniqueProjectFilters.filter(
     (pattern) => !pattern.startsWith('!'),
   );
-  const negativePatterns = normalizedProjectFilters
+  const negativePatterns = uniqueProjectFilters
     .filter((pattern) => pattern.startsWith('!'))
     .map((pattern) => pattern.slice(1));
 
@@ -282,7 +283,7 @@ export const filterProjects = (
       .map((project) => project.name)
       .sort();
     throw new Error(
-      `No projects found for filters: ${normalizedProjectFilters.map((name) => color.cyan(name)).join(', ')}. Available workspace projects: ${availableProjectNames.map((name) => color.cyan(name)).join(', ')}.`,
+      `No projects found for filters: ${uniqueProjectFilters.map((name) => color.cyan(name)).join(', ')}. Available workspace projects: ${availableProjectNames.map((name) => color.cyan(name)).join(', ')}.`,
     );
   }
 

@@ -802,6 +802,33 @@ describe('workspace projects', () => {
     expect(stderr).not.toContain('!   @workspace/shared');
   });
 
+  test('build should deduplicate filters in miss diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      [
+        'build',
+        '--project',
+        '@workspace/missing',
+        '--project',
+        '@workspace/missing',
+        '--project',
+        '!@workspace/shared',
+      ],
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('@workspace/missing');
+    expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).toContain('@workspace/missing, !@workspace/shared');
+    expect(stderr).not.toContain('@workspace/missing, @workspace/missing');
+  });
+
   test('inspect should error when --project filters exclude all projects', async () => {
     const fixturePath = __dirname;
 
