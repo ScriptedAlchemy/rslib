@@ -97,6 +97,7 @@ Repeated `--project` patterns are collapsed to normalized unique entries in firs
 - `projects` and `lib` cannot be used in the same config file.
 - Setting `lib` to `undefined` is treated the same as omitting `lib` in workspace mode.
 - Each resolved workspace project name must be unique. Rslib uses `package.json` `name` as project identity when available, otherwise it falls back to the project directory name.
+- For duplicate package or project name validation errors, Rslib reports conflicting config file paths in deterministic sorted order.
 - In workspace mode, currently supported commands are:
   - `rslib build`
   - `rslib inspect`

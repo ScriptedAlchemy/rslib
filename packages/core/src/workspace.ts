@@ -381,9 +381,9 @@ const includeDependencyProjects = (
 const linkProjectDependencies = (
   projects: ResolvedRslibProjectWithDependencyPackages[],
 ): ResolvedRslibProject[] => {
-  const packageNameToProject = new Map<
+  const packageNameToProjects = new Map<
     string,
-    { projectName: string; configFilePath: string }
+    Array<{ projectName: string; configFilePath: string }>
   >();
 
   for (const project of projects) {
@@ -391,16 +391,27 @@ const linkProjectDependencies = (
       continue;
     }
 
-    const previousProject = packageNameToProject.get(project.packageName);
-    if (previousProject) {
-      throw new Error(
-        `Duplicated package name ${color.cyan(project.packageName)} found in workspace projects ${color.cyan(previousProject.projectName)} (${color.cyan(previousProject.configFilePath)}) and ${color.cyan(project.name)} (${color.cyan(project.configFilePath)}).`,
-      );
-    }
-    packageNameToProject.set(project.packageName, {
+    const existingProjects =
+      packageNameToProjects.get(project.packageName) ?? [];
+    existingProjects.push({
       projectName: project.name,
       configFilePath: project.configFilePath,
     });
+    packageNameToProjects.set(project.packageName, existingProjects);
+  }
+
+  const duplicatedPackageEntry = Array.from(packageNameToProjects.entries())
+    .filter(([, mappedProjects]) => mappedProjects.length > 1)
+    .sort(([left], [right]) => left.localeCompare(right))[0];
+
+  if (duplicatedPackageEntry) {
+    const [packageName, mappedProjects] = duplicatedPackageEntry;
+    const sortedProjects = [...mappedProjects].sort((left, right) =>
+      left.configFilePath.localeCompare(right.configFilePath),
+    );
+    throw new Error(
+      `Duplicated package name ${color.cyan(packageName)} found in workspace project configs: ${sortedProjects.map((project) => color.cyan(project.configFilePath)).join(', ')}.`,
+    );
   }
 
   return projects.map(
@@ -408,7 +419,7 @@ const linkProjectDependencies = (
       const dependencies = dependencyPackageNames
         .map(
           (dependencyPackageName) =>
-            packageNameToProject.get(dependencyPackageName)?.projectName,
+            packageNameToProjects.get(dependencyPackageName)?.[0]?.projectName,
         )
         .filter(Boolean)
         .filter((dependencyName, index, list) => {
@@ -424,14 +435,25 @@ const linkProjectDependencies = (
 };
 
 const validateProjectNames = (projects: ResolvedRslibProject[]): void => {
-  const usedProjectNames = new Set<string>();
+  const projectNameToConfigPaths = new Map<string, string[]>();
   for (const project of projects) {
-    if (usedProjectNames.has(project.name)) {
-      throw new Error(
-        `Duplicated workspace project name ${color.cyan(project.name)} found. Add unique package names in each child project's package.json.`,
-      );
-    }
-    usedProjectNames.add(project.name);
+    const configPaths = projectNameToConfigPaths.get(project.name) ?? [];
+    configPaths.push(project.configFilePath);
+    projectNameToConfigPaths.set(project.name, configPaths);
+  }
+
+  const duplicatedProjectEntry = Array.from(projectNameToConfigPaths.entries())
+    .filter(([, configPaths]) => configPaths.length > 1)
+    .sort(([left], [right]) => left.localeCompare(right))[0];
+
+  if (duplicatedProjectEntry) {
+    const [projectName, configPaths] = duplicatedProjectEntry;
+    const sortedConfigPaths = [...configPaths].sort((left, right) =>
+      left.localeCompare(right),
+    );
+    throw new Error(
+      `Duplicated workspace project name ${color.cyan(projectName)} found in configs: ${sortedConfigPaths.map((configPath) => color.cyan(configPath)).join(', ')}. Add unique package names in each child project's package.json.`,
+    );
   }
 };
 

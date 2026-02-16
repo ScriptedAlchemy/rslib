@@ -1466,6 +1466,45 @@ describe('workspace projects resolver', () => {
     ).rejects.toThrowError('Duplicated package name');
   });
 
+  test('reports duplicated package name configs in deterministic order', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/z/package.json': JSON.stringify({
+        name: '@scope/dup',
+      }),
+      'packages/z/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/dup',
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/z', 'packages/a'],
+        },
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      const aConfigPath = path.join(
+        workspaceRoot,
+        'packages/a/rslib.config.mjs',
+      );
+      const zConfigPath = path.join(
+        workspaceRoot,
+        'packages/z/rslib.config.mjs',
+      );
+      expect(message).toContain('Duplicated package name');
+      expect(message).toContain(aConfigPath);
+      expect(message).toContain(zConfigPath);
+      expect(message.indexOf(aConfigPath)).toBeLessThan(
+        message.indexOf(zConfigPath),
+      );
+    }
+  });
+
   test('throws on circular dependencies', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({
@@ -2035,6 +2074,39 @@ describe('workspace projects resolver', () => {
         },
       }),
     ).rejects.toThrowError('Duplicated workspace project name');
+  });
+
+  test('reports duplicated fallback project name configs in deterministic order', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group-z/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/group-a/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/group-z/common', 'packages/group-a/common'],
+        },
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      const aConfigPath = path.join(
+        workspaceRoot,
+        'packages/group-a/common/rslib.config.mjs',
+      );
+      const zConfigPath = path.join(
+        workspaceRoot,
+        'packages/group-z/common/rslib.config.mjs',
+      );
+      expect(message).toContain('Duplicated workspace project name');
+      expect(message).toContain(aConfigPath);
+      expect(message).toContain(zConfigPath);
+      expect(message.indexOf(aConfigPath)).toBeLessThan(
+        message.indexOf(zConfigPath),
+      );
+    }
   });
 
   test('deduplicates same project resolved by overlapping patterns', async () => {
