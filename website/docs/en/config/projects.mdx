@@ -35,6 +35,8 @@ Each entry must be a non-empty string.
 If `projects` contains non-string values or only empty entries, Rslib throws an explicit configuration error.
 When possible, the error message also includes the related config file path to help locate the invalid entry.
 
+If all project entries resolve to no child projects (for example, an unmatched glob), Rslib throws a `No child projects found from workspace projects` error.
+
 For example:
 
 ```ts title="rslib.config.ts"
