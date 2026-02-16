@@ -259,4 +259,27 @@ describe('workspace projects resolver', () => {
       }),
     ).rejects.toThrowError('Duplicated workspace project name');
   });
+
+  test('deduplicates same project resolved by overlapping patterns', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const projects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: [
+          'packages/*',
+          'packages/app',
+          'packages/**/rslib.config.mjs',
+        ],
+      },
+    });
+
+    expect(projects.map((project) => project.name)).toEqual(['@scope/app']);
+    expect(projects).toHaveLength(1);
+  });
 });
