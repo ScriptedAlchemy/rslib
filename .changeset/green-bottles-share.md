@@ -10,3 +10,4 @@ feat: add workspace `projects` orchestration mode for monorepos
 - add `--project` CLI filter (supports wildcard and negation patterns)
 - support workspace mode for `rslib build` and `rslib inspect`
 - add clear errors for unsupported workspace commands (`build --watch`, `mf-dev`)
+- improve workspace config validation diagnostics (invalid `projects` shape and no-child matches include config path context)
