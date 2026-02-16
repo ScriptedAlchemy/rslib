@@ -101,6 +101,21 @@ describe('workspace projects', () => {
     );
   });
 
+  test('build should error when --project filter matches nothing', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --project @workspace/missing',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+  });
+
   test('mf-dev should error in workspace mode', async () => {
     const fixturePath = __dirname;
 

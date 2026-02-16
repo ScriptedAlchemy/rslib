@@ -144,6 +144,36 @@ describe('workspace projects resolver', () => {
     ]);
   });
 
+  test('supports negative-only project filters', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/legacy/package.json': JSON.stringify({
+        name: '@scope/legacy',
+      }),
+      'packages/legacy/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const filteredProjects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: ['packages/*'],
+      },
+      projectFilters: ['!@scope/legacy'],
+    });
+
+    expect(filteredProjects.map((project) => project.name)).toEqual([
+      '@scope/app',
+      '@scope/shared',
+    ]);
+  });
+
   test('throws on duplicated package names', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({
