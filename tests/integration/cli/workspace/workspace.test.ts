@@ -73,6 +73,25 @@ describe('workspace projects', () => {
     ).toBe(false);
   });
 
+  test('build --project accepts trimmed filter values', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      ['build', '--project', '  @workspace/app  '],
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(path.join(fixturePath, 'packages/shared/dist/index.mjs'));
+    await expectFile(path.join(fixturePath, 'packages/app/dist/index.mjs'));
+    expect(
+      fse.existsSync(path.join(fixturePath, 'packages/group/apps/nested/dist')),
+    ).toBe(false);
+  });
+
   test('build accepts trimmed workspace project entries', async () => {
     const fixturePath = __dirname;
     await removeDistDirs(fixturePath);
@@ -320,6 +339,39 @@ describe('workspace projects', () => {
 
     const { status } = runCliSync(
       'inspect --config rslib.config.rooted.ts --project @workspace/app',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(
+      path.join(fixturePath, 'packages/app/dist/.rsbuild/rslib.config.mjs'),
+    );
+    expect(
+      fse.existsSync(
+        path.join(
+          fixturePath,
+          'packages/shared/dist/.rsbuild/rslib.config.mjs',
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      fse.existsSync(
+        path.join(
+          fixturePath,
+          'packages/group/apps/nested/dist/.rsbuild/rslib.config.mjs',
+        ),
+      ),
+    ).toBe(false);
+  });
+
+  test('inspect --project accepts trimmed filter values', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      ['inspect', '--project', '  @workspace/app  '],
       {
         cwd: fixturePath,
       },

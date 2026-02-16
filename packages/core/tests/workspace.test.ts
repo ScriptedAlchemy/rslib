@@ -529,6 +529,35 @@ describe('workspace projects resolver', () => {
     }
   });
 
+  test('trims filter patterns in filter miss diagnostics', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: ['  @scope/missing  ', '  !@scope/app  '],
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain('No projects found for filters');
+      expect(message).toContain('@scope/missing');
+      expect(message).toContain('!@scope/app');
+    }
+  });
+
   test('lists available projects in deterministic order on negative-only filter miss', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/z-lib/package.json': JSON.stringify({
