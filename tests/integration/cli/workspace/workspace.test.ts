@@ -87,6 +87,22 @@ describe('workspace projects', () => {
     ).toBe(false);
   });
 
+  test('supports negation-only filters via --project', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync('build --project !@workspace/nested', {
+      cwd: fixturePath,
+    });
+
+    expect(status).toBe(0);
+    await expectFile(path.join(fixturePath, 'packages/shared/dist/index.mjs'));
+    await expectFile(path.join(fixturePath, 'packages/app/dist/index.mjs'));
+    expect(
+      fse.existsSync(path.join(fixturePath, 'packages/group/apps/nested/dist')),
+    ).toBe(false);
+  });
+
   test('build keeps required dependencies even when negated by --project', async () => {
     const fixturePath = __dirname;
     await removeDistDirs(fixturePath);
