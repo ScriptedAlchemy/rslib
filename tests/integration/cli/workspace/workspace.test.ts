@@ -174,6 +174,33 @@ describe('workspace projects', () => {
     ).toBe(false);
   });
 
+  test('build --project accepts trimmed negation with undefined-lib workspace config', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      [
+        'build',
+        '--config',
+        'rslib.config.undefinedLibWorkspace.ts',
+        '--project',
+        '@workspace/*',
+        '--project',
+        '!  @workspace/nested  ',
+      ],
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(path.join(fixturePath, 'packages/shared/dist/index.mjs'));
+    await expectFile(path.join(fixturePath, 'packages/app/dist/index.mjs'));
+    expect(
+      fse.existsSync(path.join(fixturePath, 'packages/group/apps/nested/dist')),
+    ).toBe(false);
+  });
+
   test('build accepts nested workspace config with undefined lib field', async () => {
     const fixturePath = __dirname;
     await removeDistDirs(fixturePath);
@@ -200,6 +227,40 @@ describe('workspace projects', () => {
 
     const { status } = runCliSync(
       'build --config rslib.config.nestedUndefinedLibWorkspace.ts --project @workspace/nested-undefined-lib',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(
+      path.join(
+        fixturePath,
+        'broken/undefined-lib-workspace/apps/nested-undefined-lib/dist/index.mjs',
+      ),
+    );
+    expect(fse.existsSync(path.join(fixturePath, 'packages/shared/dist'))).toBe(
+      false,
+    );
+    expect(fse.existsSync(path.join(fixturePath, 'packages/app/dist'))).toBe(
+      false,
+    );
+  });
+
+  test('build --project accepts trimmed negation with nested undefined-lib workspace config', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      [
+        'build',
+        '--config',
+        'rslib.config.nestedUndefinedLibWorkspace.ts',
+        '--project',
+        '@workspace/*',
+        '--project',
+        '!  @workspace/missing  ',
+      ],
       {
         cwd: fixturePath,
       },
@@ -305,6 +366,42 @@ describe('workspace projects', () => {
     ).toBe(false);
   });
 
+  test('inspect --project accepts trimmed negation with undefined-lib workspace config', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      [
+        'inspect',
+        '--config',
+        'rslib.config.undefinedLibWorkspace.ts',
+        '--project',
+        '@workspace/*',
+        '--project',
+        '!  @workspace/nested  ',
+      ],
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(
+      path.join(fixturePath, 'packages/app/dist/.rsbuild/rslib.config.mjs'),
+    );
+    await expectFile(
+      path.join(fixturePath, 'packages/shared/dist/.rsbuild/rslib.config.mjs'),
+    );
+    expect(
+      fse.existsSync(
+        path.join(
+          fixturePath,
+          'packages/group/apps/nested/dist/.rsbuild/rslib.config.mjs',
+        ),
+      ),
+    ).toBe(false);
+  });
+
   test('inspect accepts nested workspace config with undefined lib field', async () => {
     const fixturePath = __dirname;
     await removeDistDirs(fixturePath);
@@ -331,6 +428,47 @@ describe('workspace projects', () => {
 
     const { status } = runCliSync(
       'inspect --config rslib.config.nestedUndefinedLibWorkspace.ts --project @workspace/nested-undefined-lib',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(
+      path.join(
+        fixturePath,
+        'broken/undefined-lib-workspace/apps/nested-undefined-lib/dist/.rsbuild/rslib.config.mjs',
+      ),
+    );
+    expect(
+      fse.existsSync(
+        path.join(
+          fixturePath,
+          'packages/shared/dist/.rsbuild/rslib.config.mjs',
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      fse.existsSync(
+        path.join(fixturePath, 'packages/app/dist/.rsbuild/rslib.config.mjs'),
+      ),
+    ).toBe(false);
+  });
+
+  test('inspect --project accepts trimmed negation with nested undefined-lib workspace config', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      [
+        'inspect',
+        '--config',
+        'rslib.config.nestedUndefinedLibWorkspace.ts',
+        '--project',
+        '@workspace/*',
+        '--project',
+        '!  @workspace/missing  ',
+      ],
       {
         cwd: fixturePath,
       },
@@ -1153,6 +1291,32 @@ describe('workspace projects', () => {
     expect(stderr).not.toContain('cannot be used together');
   });
 
+  test('mf-dev with --project accepts trimmed negation with undefined-lib workspace config', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      [
+        'mf-dev',
+        '--config',
+        'rslib.config.undefinedLibWorkspace.ts',
+        '--project',
+        '@workspace/*',
+        '--project',
+        '!  @workspace/nested  ',
+      ],
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain(
+      'The "mf-dev" command does not support workspace projects mode yet',
+    );
+    expect(stderr).not.toContain('No projects found for filters');
+  });
+
   test('mf-dev with --project should treat nested undefined-lib workspace config as workspace mode', async () => {
     const fixturePath = __dirname;
 
@@ -1169,6 +1333,32 @@ describe('workspace projects', () => {
       'The "mf-dev" command does not support workspace projects mode yet',
     );
     expect(stderr).not.toContain('cannot be used together');
+  });
+
+  test('mf-dev with --project accepts trimmed negation with nested undefined-lib workspace config', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      [
+        'mf-dev',
+        '--config',
+        'rslib.config.nestedUndefinedLibWorkspace.ts',
+        '--project',
+        '@workspace/*',
+        '--project',
+        '!  @workspace/missing  ',
+      ],
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain(
+      'The "mf-dev" command does not support workspace projects mode yet',
+    );
+    expect(stderr).not.toContain('No projects found for filters');
   });
 
   test('mf-dev with --project should still error in workspace mode', async () => {
