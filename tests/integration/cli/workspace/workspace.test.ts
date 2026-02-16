@@ -217,4 +217,20 @@ describe('workspace projects', () => {
     expect(status).toBe(1);
     expect(stderr).toContain('cannot be used together');
   });
+
+  test('should error when a workspace project has no rslib config', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.missingChild.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Cannot find config file in');
+    expect(stderr).toContain('broken/no-config');
+  });
 });
