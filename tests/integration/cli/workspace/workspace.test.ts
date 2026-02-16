@@ -527,6 +527,86 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/shared');
   });
 
+  test('build should error when undefined-lib mixed project filters match nothing', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.undefinedLibWorkspace.ts --project @workspace/missing --project !@workspace/shared',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('@workspace/missing');
+    expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/app');
+    expect(stderr).toContain('@workspace/shared');
+    expect(stderr).toContain('@workspace/nested');
+  });
+
+  test('inspect should error when undefined-lib mixed project filters match nothing', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.undefinedLibWorkspace.ts --project @workspace/missing --project !@workspace/shared',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('@workspace/missing');
+    expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/app');
+    expect(stderr).toContain('@workspace/shared');
+    expect(stderr).toContain('@workspace/nested');
+  });
+
+  test('build should error when nested undefined-lib mixed project filters match nothing', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.nestedUndefinedLibWorkspace.ts --project @workspace/missing --project !@workspace/nested-undefined-lib',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('@workspace/missing');
+    expect(stderr).toContain('!@workspace/nested-undefined-lib');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/nested-undefined-lib');
+  });
+
+  test('inspect should error when nested undefined-lib mixed project filters match nothing', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.nestedUndefinedLibWorkspace.ts --project @workspace/missing --project !@workspace/nested-undefined-lib',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('@workspace/missing');
+    expect(stderr).toContain('!@workspace/nested-undefined-lib');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/nested-undefined-lib');
+  });
+
   test('build should error when negation-only filters exclude all projects', async () => {
     const fixturePath = __dirname;
 
