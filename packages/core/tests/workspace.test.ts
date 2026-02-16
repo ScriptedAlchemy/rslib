@@ -523,6 +523,30 @@ describe('workspace projects resolver', () => {
     ).rejects.toThrowError('cannot be used together');
   });
 
+  test('allows workspace config when lib is undefined', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/a',
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const projects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      configFilePath: `${workspaceRoot}/rslib.config.mjs`,
+      config: {
+        projects: ['packages/*'],
+        // @ts-expect-error validate runtime behavior for explicitly undefined lib
+        lib: undefined,
+      },
+    });
+
+    expect(projects).toHaveLength(1);
+    expect(projects[0]).toMatchObject({
+      name: '@scope/a',
+    });
+  });
+
   test('throws when projects contains non-string entries', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({

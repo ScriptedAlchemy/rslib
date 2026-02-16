@@ -86,6 +86,25 @@ describe('workspace projects', () => {
     );
   });
 
+  test('build accepts workspace config with undefined lib field', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      'build --config rslib.config.undefinedLibWorkspace.ts',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(path.join(fixturePath, 'packages/shared/dist/index.mjs'));
+    await expectFile(path.join(fixturePath, 'packages/app/dist/index.mjs'));
+    await expectFile(
+      path.join(fixturePath, 'packages/group/apps/nested/dist/index.mjs'),
+    );
+  });
+
   test('inspect accepts trimmed workspace project entries', async () => {
     const fixturePath = __dirname;
     await removeDistDirs(fixturePath);
