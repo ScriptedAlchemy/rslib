@@ -889,6 +889,39 @@ describe('workspace projects', () => {
     expect(stderr).not.toContain('@workspace/missing, @workspace/missing');
   });
 
+  test('build should deduplicate normalized undefined-lib filters in miss diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      [
+        'build',
+        '--config',
+        'rslib.config.undefinedLibWorkspace.ts',
+        '--project',
+        '  @workspace/missing  ',
+        '--project',
+        '@workspace/missing',
+        '--project',
+        '  !@workspace/shared  ',
+        '--project',
+        '!   @workspace/shared',
+      ],
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('@workspace/missing');
+    expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).toContain('@workspace/missing, !@workspace/shared');
+    expect(stderr).not.toContain('@workspace/missing, @workspace/missing');
+    expect(stderr).not.toContain('!@workspace/shared, !@workspace/shared');
+    expect(stderr).not.toContain('!   @workspace/shared');
+  });
+
   test('build should deduplicate nested undefined-lib filters in miss diagnostics', async () => {
     const fixturePath = __dirname;
 
@@ -918,6 +951,43 @@ describe('workspace projects', () => {
       '@workspace/missing, !@workspace/nested-undefined-lib',
     );
     expect(stderr).not.toContain('@workspace/missing, @workspace/missing');
+  });
+
+  test('build should deduplicate normalized nested undefined-lib filters in miss diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      [
+        'build',
+        '--config',
+        'rslib.config.nestedUndefinedLibWorkspace.ts',
+        '--project',
+        '  @workspace/missing  ',
+        '--project',
+        '@workspace/missing',
+        '--project',
+        '  !@workspace/nested-undefined-lib  ',
+        '--project',
+        '!   @workspace/nested-undefined-lib',
+      ],
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('@workspace/missing');
+    expect(stderr).toContain('!@workspace/nested-undefined-lib');
+    expect(stderr).toContain(
+      '@workspace/missing, !@workspace/nested-undefined-lib',
+    );
+    expect(stderr).not.toContain('@workspace/missing, @workspace/missing');
+    expect(stderr).not.toContain(
+      '!@workspace/nested-undefined-lib, !@workspace/nested-undefined-lib',
+    );
+    expect(stderr).not.toContain('!   @workspace/nested-undefined-lib');
   });
 
   test('inspect should deduplicate filters in miss diagnostics', async () => {
@@ -1007,6 +1077,39 @@ describe('workspace projects', () => {
     expect(stderr).not.toContain('@workspace/missing, @workspace/missing');
   });
 
+  test('inspect should deduplicate normalized undefined-lib filters in miss diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      [
+        'inspect',
+        '--config',
+        'rslib.config.undefinedLibWorkspace.ts',
+        '--project',
+        '  @workspace/missing  ',
+        '--project',
+        '@workspace/missing',
+        '--project',
+        '  !@workspace/shared  ',
+        '--project',
+        '!   @workspace/shared',
+      ],
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('@workspace/missing');
+    expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).toContain('@workspace/missing, !@workspace/shared');
+    expect(stderr).not.toContain('@workspace/missing, @workspace/missing');
+    expect(stderr).not.toContain('!@workspace/shared, !@workspace/shared');
+    expect(stderr).not.toContain('!   @workspace/shared');
+  });
+
   test('inspect should deduplicate nested undefined-lib filters in miss diagnostics', async () => {
     const fixturePath = __dirname;
 
@@ -1036,6 +1139,43 @@ describe('workspace projects', () => {
       '@workspace/missing, !@workspace/nested-undefined-lib',
     );
     expect(stderr).not.toContain('@workspace/missing, @workspace/missing');
+  });
+
+  test('inspect should deduplicate normalized nested undefined-lib filters in miss diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      [
+        'inspect',
+        '--config',
+        'rslib.config.nestedUndefinedLibWorkspace.ts',
+        '--project',
+        '  @workspace/missing  ',
+        '--project',
+        '@workspace/missing',
+        '--project',
+        '  !@workspace/nested-undefined-lib  ',
+        '--project',
+        '!   @workspace/nested-undefined-lib',
+      ],
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('@workspace/missing');
+    expect(stderr).toContain('!@workspace/nested-undefined-lib');
+    expect(stderr).toContain(
+      '@workspace/missing, !@workspace/nested-undefined-lib',
+    );
+    expect(stderr).not.toContain('@workspace/missing, @workspace/missing');
+    expect(stderr).not.toContain(
+      '!@workspace/nested-undefined-lib, !@workspace/nested-undefined-lib',
+    );
+    expect(stderr).not.toContain('!   @workspace/nested-undefined-lib');
   });
 
   test('inspect should error when --project filters exclude all projects', async () => {
@@ -1824,6 +1964,39 @@ describe('workspace projects', () => {
     expect(stderr).not.toContain('@workspace/missing, @workspace/missing');
   });
 
+  test('mf-dev should deduplicate normalized undefined-lib filters in miss diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      [
+        'mf-dev',
+        '--config',
+        'rslib.config.undefinedLibWorkspace.ts',
+        '--project',
+        '  @workspace/missing  ',
+        '--project',
+        '@workspace/missing',
+        '--project',
+        '  !@workspace/shared  ',
+        '--project',
+        '!   @workspace/shared',
+      ],
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('@workspace/missing');
+    expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).toContain('@workspace/missing, !@workspace/shared');
+    expect(stderr).not.toContain('@workspace/missing, @workspace/missing');
+    expect(stderr).not.toContain('!@workspace/shared, !@workspace/shared');
+    expect(stderr).not.toContain('!   @workspace/shared');
+  });
+
   test('mf-dev should deduplicate nested undefined-lib filters in miss diagnostics', async () => {
     const fixturePath = __dirname;
 
@@ -1853,6 +2026,43 @@ describe('workspace projects', () => {
       '@workspace/missing, !@workspace/nested-undefined-lib',
     );
     expect(stderr).not.toContain('@workspace/missing, @workspace/missing');
+  });
+
+  test('mf-dev should deduplicate normalized nested undefined-lib filters in miss diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      [
+        'mf-dev',
+        '--config',
+        'rslib.config.nestedUndefinedLibWorkspace.ts',
+        '--project',
+        '  @workspace/missing  ',
+        '--project',
+        '@workspace/missing',
+        '--project',
+        '  !@workspace/nested-undefined-lib  ',
+        '--project',
+        '!   @workspace/nested-undefined-lib',
+      ],
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('@workspace/missing');
+    expect(stderr).toContain('!@workspace/nested-undefined-lib');
+    expect(stderr).toContain(
+      '@workspace/missing, !@workspace/nested-undefined-lib',
+    );
+    expect(stderr).not.toContain('@workspace/missing, @workspace/missing');
+    expect(stderr).not.toContain(
+      '!@workspace/nested-undefined-lib, !@workspace/nested-undefined-lib',
+    );
+    expect(stderr).not.toContain('!   @workspace/nested-undefined-lib');
   });
 
   test('mf-dev should error when undefined-lib mixed project filters match nothing', async () => {
