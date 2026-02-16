@@ -469,6 +469,26 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/shared');
   });
 
+  test('build should error when mixed project filters match nothing', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --project @workspace/missing --project !@workspace/shared',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('@workspace/missing');
+    expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/app');
+    expect(stderr).toContain('@workspace/shared');
+  });
+
   test('inspect should error when --project filters exclude all projects', async () => {
     const fixturePath = __dirname;
 
@@ -482,6 +502,26 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/app');
+    expect(stderr).toContain('@workspace/shared');
+  });
+
+  test('inspect should error when mixed project filters match nothing', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --project @workspace/missing --project !@workspace/shared',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('@workspace/missing');
+    expect(stderr).toContain('!@workspace/shared');
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
