@@ -86,6 +86,13 @@ const ensureWorkspaceProjectConfig = (config: RslibWorkspaceConfig): void => {
       `Expect ${color.cyan('"projects"')} to be a non-empty array in workspace mode.`,
     );
   }
+  for (const [index, projectEntry] of config.projects.entries()) {
+    if (typeof projectEntry !== 'string') {
+      throw new Error(
+        `Expect every item in ${color.cyan('"projects"')} to be a string path or glob, but received ${color.cyan(typeof projectEntry)} at index ${color.cyan(String(index))}.`,
+      );
+    }
+  }
   if (
     'lib' in config &&
     Array.isArray((config as Record<string, unknown>).lib)

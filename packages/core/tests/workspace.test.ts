@@ -469,6 +469,25 @@ describe('workspace projects resolver', () => {
     ).rejects.toThrowError('cannot be used together');
   });
 
+  test('throws when projects contains non-string entries', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/a',
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          // @ts-expect-error validate runtime guard for non-string entries
+          projects: ['packages/*', 123],
+        },
+      }),
+    ).rejects.toThrowError('to be a string path or glob');
+  });
+
   test('throws on duplicated fallback project names', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/group-a/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
