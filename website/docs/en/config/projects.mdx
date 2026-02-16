@@ -66,6 +66,8 @@ When filtering projects:
 - `rslib build --project ...` automatically includes local workspace dependencies of selected projects, then builds in dependency order.
 - `rslib inspect --project ...` only inspects the selected projects.
 
+So if a selected project depends on another local project, that dependency will still be built even if it is excluded by a negation pattern.
+
 ## Notes
 
 - `projects` and `lib` cannot be used in the same config file.
