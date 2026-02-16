@@ -111,6 +111,25 @@ describe('workspace projects', () => {
     );
   });
 
+  test('build --project works with undefined-lib workspace config', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      'build --config rslib.config.undefinedLibWorkspace.ts --project @workspace/app',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(path.join(fixturePath, 'packages/shared/dist/index.mjs'));
+    await expectFile(path.join(fixturePath, 'packages/app/dist/index.mjs'));
+    expect(
+      fse.existsSync(path.join(fixturePath, 'packages/group/apps/nested/dist')),
+    ).toBe(false);
+  });
+
   test('build accepts nested workspace config with undefined lib field', async () => {
     const fixturePath = __dirname;
     await removeDistDirs(fixturePath);
@@ -181,6 +200,39 @@ describe('workspace projects', () => {
         'packages/group/apps/nested/dist/.rsbuild/rslib.config.mjs',
       ),
     );
+  });
+
+  test('inspect --project works with undefined-lib workspace config', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      'inspect --config rslib.config.undefinedLibWorkspace.ts --project @workspace/app',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(
+      path.join(fixturePath, 'packages/app/dist/.rsbuild/rslib.config.mjs'),
+    );
+    expect(
+      fse.existsSync(
+        path.join(
+          fixturePath,
+          'packages/shared/dist/.rsbuild/rslib.config.mjs',
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      fse.existsSync(
+        path.join(
+          fixturePath,
+          'packages/group/apps/nested/dist/.rsbuild/rslib.config.mjs',
+        ),
+      ),
+    ).toBe(false);
   });
 
   test('inspect accepts nested workspace config with undefined lib field', async () => {
