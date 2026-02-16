@@ -158,7 +158,7 @@ const resolveProjectEntryPaths = async (
     : path.resolve(root, normalizedEntry);
 
   if (isDynamicPattern(normalizedEntry)) {
-    return glob(normalizedEntry, {
+    const matchedPaths = await glob(normalizedEntry, {
       cwd: root,
       absolute: true,
       dot: true,
@@ -166,6 +166,7 @@ const resolveProjectEntryPaths = async (
       expandDirectories: false,
       ignore: ['**/node_modules/**', '**/.DS_Store'],
     });
+    return matchedPaths.sort();
   }
 
   if (!fs.existsSync(resolvedEntry)) {
@@ -335,6 +336,7 @@ export const sortProjectsByDependencies = (
     const cycleProjects = projects
       .map((project) => project.name)
       .filter((projectName) => !sortedNames.includes(projectName));
+    cycleProjects.sort();
     throw new Error(
       `Circular dependency detected in workspace projects: ${cycleProjects.map((name) => color.cyan(name)).join(', ')}.`,
     );

@@ -699,6 +699,28 @@ describe('workspace projects', () => {
     );
   });
 
+  test('build should report circular dependencies in deterministic order', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.cycle.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain(
+      'Circular dependency detected in workspace projects',
+    );
+    expect(stderr).toContain('@workspace/a');
+    expect(stderr).toContain('@workspace/z');
+    expect(stderr).toContain(
+      'Circular dependency detected in workspace projects: @workspace/a, @workspace/z',
+    );
+  });
+
   test('build should error when --project filter matches nothing', async () => {
     const fixturePath = __dirname;
 
@@ -1859,6 +1881,28 @@ describe('workspace projects', () => {
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
+  });
+
+  test('inspect should report circular dependencies in deterministic order', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.cycle.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain(
+      'Circular dependency detected in workspace projects',
+    );
+    expect(stderr).toContain('@workspace/a');
+    expect(stderr).toContain('@workspace/z');
+    expect(stderr).toContain(
+      'Circular dependency detected in workspace projects: @workspace/a, @workspace/z',
+    );
   });
 
   test('inspect should error when --project filter is empty', async () => {

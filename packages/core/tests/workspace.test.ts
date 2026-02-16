@@ -1494,6 +1494,40 @@ describe('workspace projects resolver', () => {
     ).rejects.toThrowError('Circular dependency detected');
   });
 
+  test('reports circular dependency project names in deterministic order', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/z/package.json': JSON.stringify({
+        name: '@scope/z',
+        dependencies: {
+          '@scope/a': 'workspace:*',
+        },
+      }),
+      'packages/z/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/a',
+        dependencies: {
+          '@scope/z': 'workspace:*',
+        },
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/z', 'packages/a'],
+        },
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain(
+        'Circular dependency detected in workspace projects: @scope/a, @scope/z',
+      );
+    }
+  });
+
   test('throws when projects and lib are used together', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({
