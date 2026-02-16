@@ -13,4 +13,4 @@ feat: add workspace `projects` orchestration mode for monorepos
 - improve workspace config validation diagnostics (invalid `projects` shape and no-child matches include config path context)
 - normalize workspace diagnostics for trimmed `projects` / `--project` values and validate empty negation patterns after `!`
 - deduplicate no-child diagnostic patterns for repeated workspace project entries
-- deduplicate repeated `--project` filters in filter-miss diagnostics
+- deduplicate repeated `--project` filters in filter-miss diagnostics and report normalized filter patterns
