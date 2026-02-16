@@ -2416,6 +2416,44 @@ describe('workspace projects', () => {
     );
   });
 
+  test('build should list sorted available projects when nested workspace multiple without package names filter matches nothing', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.nestedWorkspaceMultipleNoPackage.ts --project missing-*',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('a-lib');
+    expect(stderr).toContain('z-lib');
+    expect(stderr).toContain('Available workspace projects: a-lib, z-lib');
+  });
+
+  test('inspect should list sorted available projects when nested workspace multiple without package names filter matches nothing', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.nestedWorkspaceMultipleNoPackage.ts --project missing-*',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('a-lib');
+    expect(stderr).toContain('z-lib');
+    expect(stderr).toContain('Available workspace projects: a-lib, z-lib');
+  });
+
   test('build should list sorted available projects when nested workspace multiple negation-only filters exclude all projects', async () => {
     const fixturePath = __dirname;
 
@@ -2460,6 +2498,48 @@ describe('workspace projects', () => {
     expect(stderr).toContain(
       'Available workspace projects: @workspace/multi-a, @workspace/multi-z',
     );
+  });
+
+  test('build should list sorted available projects when nested workspace multiple without package names negation-only filters exclude all projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.nestedWorkspaceMultipleNoPackage.ts --project !a-lib --project !z-lib',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!a-lib');
+    expect(stderr).toContain('!z-lib');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('a-lib');
+    expect(stderr).toContain('z-lib');
+    expect(stderr).toContain('Available workspace projects: a-lib, z-lib');
+  });
+
+  test('inspect should list sorted available projects when nested workspace multiple without package names negation-only filters exclude all projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.nestedWorkspaceMultipleNoPackage.ts --project !a-lib --project !z-lib',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!a-lib');
+    expect(stderr).toContain('!z-lib');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('a-lib');
+    expect(stderr).toContain('z-lib');
+    expect(stderr).toContain('Available workspace projects: a-lib, z-lib');
   });
 
   test('mf-dev should error in workspace mode', async () => {
@@ -2764,6 +2844,25 @@ describe('workspace projects', () => {
     );
   });
 
+  test('mf-dev should list sorted available projects when nested workspace multiple without package names filter matches nothing', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.nestedWorkspaceMultipleNoPackage.ts --project missing-*',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('a-lib');
+    expect(stderr).toContain('z-lib');
+    expect(stderr).toContain('Available workspace projects: a-lib, z-lib');
+  });
+
   test('mf-dev should list sorted available projects when nested workspace multiple negation-only filters exclude all projects', async () => {
     const fixturePath = __dirname;
 
@@ -2785,6 +2884,27 @@ describe('workspace projects', () => {
     expect(stderr).toContain(
       'Available workspace projects: @workspace/multi-a, @workspace/multi-z',
     );
+  });
+
+  test('mf-dev should list sorted available projects when nested workspace multiple without package names negation-only filters exclude all projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.nestedWorkspaceMultipleNoPackage.ts --project !a-lib --project !z-lib',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!a-lib');
+    expect(stderr).toContain('!z-lib');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('a-lib');
+    expect(stderr).toContain('z-lib');
+    expect(stderr).toContain('Available workspace projects: a-lib, z-lib');
   });
 
   test('mf-dev should error when mixed project filters match nothing', async () => {
