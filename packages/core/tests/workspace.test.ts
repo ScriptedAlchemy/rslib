@@ -1230,6 +1230,31 @@ describe('workspace projects resolver', () => {
     }
   });
 
+  test('deduplicates nested no-child project patterns when child lib is undefined', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group/rslib.config.mjs': `export default { projects: ['apps/*', '  apps/*  '], lib: undefined };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain(
+        'No child projects found from workspace projects',
+      );
+      expect(message).toContain('/packages/group/rslib.config.mjs');
+      expect(message).toContain(': apps/*.');
+      expect(message).not.toContain('apps/*, apps/*');
+      expect(message).not.toContain('  apps/*  ');
+    }
+  });
+
   test('throws when workspace projects array is empty', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({
@@ -1454,6 +1479,37 @@ describe('workspace projects resolver', () => {
       expect(message).toContain('packages/empty/*');
       expect(message).toContain(': packages/empty/*.');
       expect(message).not.toContain('packages/empty/*, packages/empty/*');
+    }
+  });
+
+  test('deduplicates no-child project patterns when root lib is undefined', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
+        config: {
+          projects: ['packages/empty/*', '  packages/empty/*  '],
+          // @ts-expect-error validate runtime behavior for explicitly undefined lib
+          lib: undefined,
+        },
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain(
+        'No child projects found from workspace projects',
+      );
+      expect(message).toContain('packages/empty/*');
+      expect(message).toContain(': packages/empty/*.');
+      expect(message).not.toContain('packages/empty/*, packages/empty/*');
+      expect(message).not.toContain('  packages/empty/*  ');
     }
   });
 
