@@ -130,6 +130,9 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/app');
+    expect(stderr).toContain('@workspace/shared');
   });
 
   test('inspect should error when --project filters exclude all projects', async () => {
@@ -145,6 +148,8 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/app');
   });
 
   test('mf-dev should error in workspace mode', async () => {
