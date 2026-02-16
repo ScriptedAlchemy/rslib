@@ -66,6 +66,28 @@ Rslib will generate the [environments](https://rsbuild.rs/config/environments) c
 
 You can also refer to the [Configuration Overview](/config/) page to view the detailed introduction of all configurations.
 
+### Workspace projects
+
+You can also use Rslib in a monorepo workspace by defining [projects](/config/projects):
+
+```ts title="rslib.config.ts"
+import { defineConfig } from '@rslib/core';
+
+export default defineConfig({
+  projects: ['packages/*'],
+});
+```
+
+In this mode, Rslib will resolve child projects and orchestrate `build` / `inspect` across them.  
+`rslib build` will sort projects by local dependency relationships before building.
+
+:::note
+
+- `projects` and `lib` cannot be used in the same config file.
+- Workspace mode currently supports `build` and `inspect`.
+- `build --watch` and `mf-dev` are not supported in workspace mode yet.
+  :::
+
 ## Configuration file
 
 When you use the CLI of Rslib, Rslib will automatically read the configuration file in the root directory of the current project and resolve it in the following order:

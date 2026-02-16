@@ -34,6 +34,7 @@ Rslib CLI provides several common flags that can be used with all commands:
 | `--env-mode <mode>`        | Specify the env mode to load the `.env.[mode]` file, see [Rsbuild - Env mode](https://rsbuild.rs/guide/advanced/env-vars#env-mode)                          |
 | `-h, --help`               | Display help for command                                                                                                                                    |
 | `--lib <id>`               | Specify the library to run commands (repeatable, e.g. `--lib esm --lib cjs`), see [lib.id](/config/lib/id) to learn how to get or set the ID of the library |
+| `--project <name>`         | Specify workspace project(s) to run commands (repeatable, supports wildcard and negation)                                                                   |
 | `--log-level <level>`      | Set the log level (`info` \| `warn` \| `error` \| `silent`), see [logLevel](/config/rsbuild/log-level)                                                      |
 | `--no-env`                 | Disable loading of `.env` files                                                                                                                             |
 | `-r, --root <root>`        | Specify the project root directory, can be an absolute path or a path relative to cwd                                                                       |
@@ -65,6 +66,11 @@ Options:
 
 :::note
 If the [Rslib configuration file](/guide/basic/configure-rslib#configuration-file) is not present in your project, the CLI will automatically use the default configuration containing only a single [lib](/config/lib/) and apply all build options from the command line. You can add a configuration file once you need a more complex configuration or want to build outputs in multiple formats.
+:::
+
+:::note
+When [projects](/config/projects) is configured for workspace mode, `rslib build` orchestrates all matched child projects and builds them in dependency order.  
+In workspace mode, `build --watch` is not supported yet.
 :::
 
 ### Environment variables
@@ -127,6 +133,10 @@ Inspect config succeed, open following files to view the content:
   - Rspack Config (esm): /project/dist/.rsbuild/rspack.config.esm.mjs
   - Rslib Config: /project/dist/.rsbuild/rslib.config.mjs
 ```
+
+:::note
+When [projects](/config/projects) is configured for workspace mode, `rslib inspect` runs for each matched child project.
+:::
 
 ### Verbose content
 

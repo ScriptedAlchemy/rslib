@@ -4,6 +4,7 @@
     "label": "Overview"
   },
   "index",
+  "projects",
   {
     "type": "dir-section-header",
     "name": "lib",

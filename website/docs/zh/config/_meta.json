@@ -4,6 +4,7 @@
     "label": "总览"
   },
   "index",
+  "projects",
   {
     "type": "dir-section-header",
     "name": "lib",

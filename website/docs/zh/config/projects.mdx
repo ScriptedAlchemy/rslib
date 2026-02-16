@@ -1,0 +1,70 @@
+# projects
+
+- **类型：** `string[]`
+- **默认值：** `undefined`
+
+`projects` 用于开启 Rslib 的工作区编排模式。  
+当配置了该选项后，Rslib 会把当前配置视为工作区配置，并根据路径或 glob 规则解析子 Rslib 项目。
+
+## 基本用法
+
+```ts title="rslib.config.ts"
+import { defineConfig } from '@rslib/core';
+
+export default defineConfig({
+  projects: ['packages/*'],
+});
+```
+
+然后你可以在工作区根目录执行：
+
+```bash
+rslib build
+rslib inspect
+```
+
+## 支持的项目项
+
+`projects` 中的每一项可以是：
+
+- 目录路径（Rslib 会在该目录中加载配置）
+- 配置文件路径
+- glob 模式（用于匹配多个目录或配置文件）
+
+例如：
+
+```ts title="rslib.config.ts"
+export default {
+  projects: ['packages/*', 'apps/**/rslib.config.ts', './examples/shared-lib'],
+};
+```
+
+## 嵌套工作区配置
+
+子项目也可以继续使用包含 `projects` 的工作区配置。Rslib 会递归解析这些嵌套项目。
+
+## 依赖构建顺序
+
+在工作区模式下，`rslib build` 会按依赖顺序构建项目。
+
+Rslib 会读取每个子项目 `package.json` 中的本地依赖关系，并在构建前进行拓扑排序。  
+如果检测到循环依赖，Rslib 会抛出错误。
+
+## 项目过滤
+
+可以通过 [--project](/guide/basic/cli#公共选项) 仅执行指定工作区项目：
+
+```bash
+rslib build --project @scope/pkg-a
+rslib inspect --project @scope/pkg-*
+```
+
+`--project` 支持通配符和取反模式。
+
+## 注意事项
+
+- 同一个配置文件中不能同时使用 `projects` 和 `lib`。
+- 工作区模式当前支持：
+  - `rslib build`
+  - `rslib inspect`
+- 工作区模式暂不支持 `rslib build --watch` 和 `rslib mf-dev`。

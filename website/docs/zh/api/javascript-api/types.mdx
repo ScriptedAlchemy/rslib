@@ -28,6 +28,26 @@ const config: RslibConfig = {
 };
 ```
 
+## RslibWorkspaceConfig
+
+使用 [projects](/config/projects) 时，工作区编排配置的类型。
+
+```ts twoslash
+import type { RslibWorkspaceConfig } from '@rslib/core';
+
+const config: RslibWorkspaceConfig = {
+  projects: ['packages/*'],
+};
+```
+
+## RslibUserConfig
+
+`RslibConfig` 与 `RslibWorkspaceConfig` 的联合类型。
+
+```ts twoslash
+import type { RslibUserConfig } from '@rslib/core';
+```
+
 你也可以引用 Rslib 配置中各个字段的类型定义：
 
 ```ts twoslash

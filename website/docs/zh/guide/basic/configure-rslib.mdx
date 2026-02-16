@@ -66,6 +66,28 @@ Rslib 会在内部生成 Rsbuild 的 [environments](https://rsbuild.rs/zh/config
 
 你也可以在 [配置概览](/config/) 页面查看所有配置的详细介绍。
 
+### 工作区项目
+
+在 monorepo 场景中，你也可以通过 [projects](/config/projects) 配置来让 Rslib 编排多个子项目：
+
+```ts title="rslib.config.ts"
+import { defineConfig } from '@rslib/core';
+
+export default defineConfig({
+  projects: ['packages/*'],
+});
+```
+
+在该模式下，Rslib 会解析子项目，并统一编排 `build` / `inspect`。  
+执行 `rslib build` 时，会先按本地依赖关系完成拓扑排序，再按顺序构建。
+
+:::note
+
+- 同一个配置文件中不能同时使用 `projects` 和 `lib`。
+- 工作区模式目前支持 `build` 和 `inspect`。
+- 工作区模式暂不支持 `build --watch` 和 `mf-dev`。
+  :::
+
 ## 配置文件
 
 当你使用 Rslib 的 CLI 命令时，Rslib 会自动读取当前项目根目录下的配置文件，按照以下顺序进行解析：

@@ -8,6 +8,11 @@ export default function Overview() {
 
   const OVERVIEW_GROUPS = [
     {
+      name: lang === 'en' ? 'Workspace configurations' : '工作区配置',
+      link: '/config/projects',
+      items: [{ text: 'projects', link: '/config/projects' }],
+    },
+    {
       name: lang === 'en' ? 'Lib configurations' : 'Lib 配置',
       link: '/config/lib/',
       items: [

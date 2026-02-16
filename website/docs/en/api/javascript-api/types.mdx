@@ -28,6 +28,26 @@ const config: RslibConfig = {
 };
 ```
 
+## RslibWorkspaceConfig
+
+The type of workspace orchestration configuration when using [projects](/config/projects).
+
+```ts twoslash
+import type { RslibWorkspaceConfig } from '@rslib/core';
+
+const config: RslibWorkspaceConfig = {
+  projects: ['packages/*'],
+};
+```
+
+## RslibUserConfig
+
+Union type of `RslibConfig` and `RslibWorkspaceConfig`.
+
+```ts twoslash
+import type { RslibUserConfig } from '@rslib/core';
+```
+
 You can also import the type definitions of each field in the Rslib config:
 
 ```ts twoslash

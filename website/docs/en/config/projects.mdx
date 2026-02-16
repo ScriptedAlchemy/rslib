@@ -1,0 +1,70 @@
+# projects
+
+- **Type:** `string[]`
+- **Default:** `undefined`
+
+Use `projects` to enable workspace orchestration mode in Rslib.  
+When this option is set, Rslib treats the current config as a workspace config and resolves child Rslib projects from the provided paths or glob patterns.
+
+## Basic usage
+
+```ts title="rslib.config.ts"
+import { defineConfig } from '@rslib/core';
+
+export default defineConfig({
+  projects: ['packages/*'],
+});
+```
+
+Then you can run commands in the workspace root:
+
+```bash
+rslib build
+rslib inspect
+```
+
+## Supported project entries
+
+Each item in `projects` can be:
+
+- A directory path (Rslib will load the config inside that directory)
+- A config file path
+- A glob pattern (for matching multiple directories or config files)
+
+For example:
+
+```ts title="rslib.config.ts"
+export default {
+  projects: ['packages/*', 'apps/**/rslib.config.ts', './examples/shared-lib'],
+};
+```
+
+## Nested workspace configs
+
+A child project can itself provide a workspace config with `projects`. Rslib will resolve these nested projects recursively.
+
+## Dependency ordering
+
+In workspace mode, `rslib build` builds projects in dependency order.
+
+Rslib infers local dependencies from each child project's `package.json` and sorts projects topologically before building.  
+If a circular dependency is detected, Rslib throws an error.
+
+## Project filtering
+
+Use [--project](/guide/basic/cli#common-flags) to run commands for specific workspace projects:
+
+```bash
+rslib build --project @scope/pkg-a
+rslib inspect --project @scope/pkg-*
+```
+
+`--project` supports wildcard and negation patterns.
+
+## Notes
+
+- `projects` and `lib` cannot be used in the same config file.
+- In workspace mode, currently supported commands are:
+  - `rslib build`
+  - `rslib inspect`
+- `rslib build --watch` and `rslib mf-dev` are not supported in workspace mode yet.
