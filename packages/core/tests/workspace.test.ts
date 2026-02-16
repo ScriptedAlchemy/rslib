@@ -1034,6 +1034,51 @@ describe('workspace projects resolver', () => {
     }
   });
 
+  test('preserves first-occurrence order across multiple normalized unique filters with undefined root lib in miss diagnostics', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+          // @ts-expect-error validate runtime behavior for explicitly undefined lib
+          lib: undefined,
+        },
+        projectFilters: [
+          '  !@scope/shared  ',
+          '  @scope/missing-b  ',
+          '@scope/missing-a',
+          '!   @scope/shared',
+          '  @scope/missing-a  ',
+        ],
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain('No projects found for filters');
+      expect(message).toContain('!@scope/shared');
+      expect(message).toContain('@scope/missing-b');
+      expect(message).toContain('@scope/missing-a');
+      expect(message).toContain(
+        '!@scope/shared, @scope/missing-b, @scope/missing-a',
+      );
+      expect(message).not.toContain(
+        '@scope/missing-a, @scope/missing-b, !@scope/shared',
+      );
+      expect(message).not.toContain('!   @scope/shared');
+    }
+  });
+
   test('deduplicates normalized filter patterns with undefined nested lib in miss diagnostics', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/group/rslib.config.mjs': `export default { projects: ['apps/*'], lib: undefined };`,
@@ -1099,6 +1144,46 @@ describe('workspace projects resolver', () => {
       expect(message).toContain('@scope/missing');
       expect(message).toContain('!@scope/nested, @scope/missing');
       expect(message).not.toContain('@scope/missing, !@scope/nested');
+      expect(message).not.toContain('!   @scope/nested');
+    }
+  });
+
+  test('preserves first-occurrence order across multiple normalized unique filters with undefined nested lib in miss diagnostics', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group/rslib.config.mjs': `export default { projects: ['apps/*'], lib: undefined };`,
+      'packages/group/apps/nested/package.json': JSON.stringify({
+        name: '@scope/nested',
+      }),
+      'packages/group/apps/nested/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: [
+          '  !@scope/nested  ',
+          '  @scope/missing-b  ',
+          '@scope/missing-a',
+          '!   @scope/nested',
+          '  @scope/missing-a  ',
+        ],
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain('No projects found for filters');
+      expect(message).toContain('!@scope/nested');
+      expect(message).toContain('@scope/missing-b');
+      expect(message).toContain('@scope/missing-a');
+      expect(message).toContain(
+        '!@scope/nested, @scope/missing-b, @scope/missing-a',
+      );
+      expect(message).not.toContain(
+        '@scope/missing-a, @scope/missing-b, !@scope/nested',
+      );
       expect(message).not.toContain('!   @scope/nested');
     }
   });
