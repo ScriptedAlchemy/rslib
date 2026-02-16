@@ -31,6 +31,9 @@ Each item in `projects` can be:
 - A config file path
 - A glob pattern (for matching multiple directories or config files)
 
+Each entry must be a non-empty string.  
+If `projects` contains non-string values or only empty entries, Rslib throws an explicit configuration error.
+
 For example:
 
 ```ts title="rslib.config.ts"

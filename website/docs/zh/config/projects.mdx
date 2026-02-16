@@ -31,6 +31,9 @@ rslib inspect
 - 配置文件路径
 - glob 模式（用于匹配多个目录或配置文件）
 
+每一项都必须是非空字符串。  
+如果 `projects` 中包含非字符串值，或全部为仅包含空白的字符串，Rslib 会抛出明确的配置错误。
+
 例如：
 
 ```ts title="rslib.config.ts"
