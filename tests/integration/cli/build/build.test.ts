@@ -93,6 +93,18 @@ describe('build command', async () => {
     );
   });
 
+  test('--project should error when config file is absent', () => {
+    const fixturePath = path.join(__dirname, 'no-config');
+    const { stderr, status } = runCliSync('build --project app', {
+      cwd: fixturePath,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+    expect(status).toBe(1);
+    expect(stderr).toContain(
+      'The "--project" option can only be used with workspace projects config.',
+    );
+  });
+
   test('--config', async () => {
     await fse.remove(path.join(__dirname, 'dist'));
     runCliSync('build --config ./custom-config/rslib.config.custom.ts', {
