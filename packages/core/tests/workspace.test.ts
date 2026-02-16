@@ -98,6 +98,48 @@ describe('workspace projects resolver', () => {
     expect(projects.map((project) => project.name)).toEqual(['@scope/nested']);
   });
 
+  test('resolves workspace projects relative to workspace config root', async () => {
+    const workspaceRoot = await createWorkspace({
+      'monorepo/packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'monorepo/packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const projects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        root: './monorepo',
+        projects: ['packages/*'],
+      },
+    });
+
+    expect(projects.map((project) => project.name)).toEqual(['@scope/shared']);
+    expect(projects[0]?.root).toContain('/monorepo/packages/shared');
+  });
+
+  test('resolves nested workspace projects relative to nested config root', async () => {
+    const workspaceRoot = await createWorkspace({
+      'groups/team/rslib.config.mjs': `export default { root: './apps', projects: ['*'] };`,
+      'groups/team/apps/nested/package.json': JSON.stringify({
+        name: '@scope/nested-rooted',
+      }),
+      'groups/team/apps/nested/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const projects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: ['groups/*'],
+      },
+    });
+
+    expect(projects.map((project) => project.name)).toEqual([
+      '@scope/nested-rooted',
+    ]);
+    expect(projects[0]?.root).toContain('/groups/team/apps/nested');
+  });
+
   test('supports project entries as explicit config file paths', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/app/package.json': JSON.stringify({
