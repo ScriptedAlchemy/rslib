@@ -497,6 +497,7 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!@workspace/*');
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
@@ -513,6 +514,7 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!@workspace/*');
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
@@ -532,6 +534,7 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!@workspace/nested-undefined-lib');
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/nested-undefined-lib');
   });
@@ -549,6 +552,7 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!@workspace/nested-undefined-lib');
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/nested-undefined-lib');
   });
@@ -566,6 +570,9 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!@workspace/app');
+    expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).toContain('!@workspace/nested');
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/nested');
@@ -585,6 +592,9 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!@workspace/app');
+    expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).toContain('!@workspace/nested');
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
@@ -793,6 +803,9 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!@workspace/app');
+    expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).toContain('!@workspace/nested');
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
@@ -812,6 +825,9 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!@workspace/app');
+    expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).toContain('!@workspace/nested');
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
@@ -831,6 +847,7 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!@workspace/nested-undefined-lib');
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/nested-undefined-lib');
   });

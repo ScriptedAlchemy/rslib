@@ -401,6 +401,15 @@ describe('workspace projects resolver', () => {
         projectFilters: ['!@scope/*'],
       }),
     ).rejects.toThrowError('Available workspace projects');
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: ['!@scope/*'],
+      }),
+    ).rejects.toThrowError('!@scope/*');
   });
 
   test('lists available projects in deterministic order on filter miss', async () => {
@@ -425,6 +434,37 @@ describe('workspace projects resolver', () => {
       });
       throw new Error('Expected resolveWorkspaceProjects to throw.');
     } catch (error) {
+      expect((error as Error).message).toContain(
+        'Available workspace projects: @scope/a-lib, @scope/z-lib',
+      );
+    }
+  });
+
+  test('lists available projects in deterministic order on negative-only filter miss', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/z-lib/package.json': JSON.stringify({
+        name: '@scope/z-lib',
+      }),
+      'packages/z-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/a-lib/package.json': JSON.stringify({
+        name: '@scope/a-lib',
+      }),
+      'packages/a-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: ['!@scope/*'],
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      expect((error as Error).message).toContain(
+        'No projects found for filters: !@scope/*',
+      );
       expect((error as Error).message).toContain(
         'Available workspace projects: @scope/a-lib, @scope/z-lib',
       );
