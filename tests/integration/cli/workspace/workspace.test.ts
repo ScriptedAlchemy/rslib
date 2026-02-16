@@ -395,6 +395,36 @@ describe('workspace projects', () => {
     expect(stderr).toContain('Expect "projects" to be a non-empty array');
   });
 
+  test('should error for empty workspace projects array', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.emptyProjectsArray.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Expect "projects" to be a non-empty array');
+  });
+
+  test('inspect should error for empty workspace projects array', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.emptyProjectsArray.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Expect "projects" to be a non-empty array');
+  });
+
   test('inspect should error for non-string workspace project entries', async () => {
     const fixturePath = __dirname;
 
