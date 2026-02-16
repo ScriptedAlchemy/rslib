@@ -485,7 +485,9 @@ describe('workspace projects resolver', () => {
           projects: ['packages/*', 123],
         },
       }),
-    ).rejects.toThrowError('to be a string path or glob');
+    ).rejects.toThrowError(
+      'to be a string path or glob, but received number at index 1',
+    );
   });
 
   test('throws when projects only contains empty entries', async () => {

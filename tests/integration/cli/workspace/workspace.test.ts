@@ -301,6 +301,8 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('to be a string path or glob');
+    expect(stderr).toContain('received number');
+    expect(stderr).toContain('index 1');
   });
 
   test('should error for empty workspace project entries', async () => {
