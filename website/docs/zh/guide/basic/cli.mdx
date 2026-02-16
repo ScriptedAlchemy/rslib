@@ -74,7 +74,7 @@ Options:
 :::note
 当配置了 [projects](/config/projects) 工作区模式时，`rslib build` 会统一编排所有匹配到的子项目，并按依赖顺序构建。  
 如果 `--project` 过滤后没有匹配到任何工作区项目（包括仅使用取反规则导致全部被排除的情况），Rslib 会报告过滤未命中，并输出可用的工作区项目名。
-如果传入了重复的 `--project` 规则，过滤未命中的错误信息会仅输出规范化且去重后的规则。
+如果传入了重复的 `--project` 规则，过滤未命中的错误信息会仅输出规范化、去重后且保持首次出现顺序的规则。
 工作区模式暂不支持 `build --watch`。
 :::
 
@@ -142,7 +142,7 @@ Inspect config succeed, open following files to view the content:
 :::note
 当配置了 [projects](/config/projects) 工作区模式时，`rslib inspect` 会对每个匹配到的子项目执行。
 如果 `--project` 过滤后没有匹配到任何工作区项目，Rslib 会报告过滤未命中，并输出可用的工作区项目名。
-如果传入了重复的 `--project` 规则，过滤未命中的错误信息会仅输出规范化且去重后的规则。
+如果传入了重复的 `--project` 规则，过滤未命中的错误信息会仅输出规范化、去重后且保持首次出现顺序的规则。
 :::
 
 ### 完整内容
@@ -179,5 +179,5 @@ Inspect config succeed, open following files to view the content:
 `rslib mf-dev` 目前仅支持单项目模式。  
 当配置了 [projects](/config/projects) 工作区模式后，暂不支持 `mf-dev`。
 在工作区模式下，如果传入 `--project` 且没有匹配到任何项目，Rslib 会报告过滤未命中并输出可用的工作区项目名。
-如果传入了重复的 `--project` 规则，过滤未命中的错误信息会仅输出规范化且去重后的规则。
+如果传入了重复的 `--project` 规则，过滤未命中的错误信息会仅输出规范化、去重后且保持首次出现顺序的规则。
 :::

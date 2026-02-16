@@ -88,7 +88,7 @@ When filtering projects:
 So if a selected project depends on another local project, that dependency will still be built even if it is excluded by a negation pattern.
 If filters match no projects, Rslib reports the filter miss and prints available workspace project names to help you pick valid values.
 The filter-miss error also includes normalized `--project` filters (trimmed and normalized for negation patterns) so you can quickly identify which pattern combination excluded all projects.
-Repeated `--project` patterns are collapsed to unique entries in the filter-miss diagnostics.
+Repeated `--project` patterns are collapsed to normalized unique entries in first-occurrence order in the filter-miss diagnostics.
 
 ## Notes
 
