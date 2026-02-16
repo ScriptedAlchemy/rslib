@@ -677,6 +677,33 @@ describe('workspace projects resolver', () => {
     });
   });
 
+  test('throws when child config mixes projects and null lib', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group/rslib.config.mjs': `export default { projects: ['apps/*'], lib: null };`,
+      'packages/group/apps/nested/package.json': JSON.stringify({
+        name: '@scope/nested',
+      }),
+      'packages/group/apps/nested/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      }),
+    ).rejects.toThrowError('cannot be used together');
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      }),
+    ).rejects.toThrowError('/packages/group/rslib.config.mjs');
+  });
+
   test('throws when nested workspace projects array is empty', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/group/rslib.config.mjs': 'export default { projects: [] };',
