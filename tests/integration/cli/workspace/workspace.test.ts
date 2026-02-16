@@ -2222,6 +2222,9 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/nested');
     expect(stderr).toContain('@workspace/shared');
+    expect(stderr).toContain(
+      'Available workspace projects: @workspace/app, @workspace/nested, @workspace/shared',
+    );
   });
 
   test('inspect should error when undefined-lib filters exclude all projects', async () => {
@@ -2244,6 +2247,9 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
     expect(stderr).toContain('@workspace/nested');
+    expect(stderr).toContain(
+      'Available workspace projects: @workspace/app, @workspace/nested, @workspace/shared',
+    );
   });
 
   test('build should error when nested undefined-lib filter matches nothing', async () => {
@@ -3197,6 +3203,9 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
     expect(stderr).toContain('@workspace/nested');
+    expect(stderr).toContain(
+      'Available workspace projects: @workspace/app, @workspace/nested, @workspace/shared',
+    );
   });
 
   test('mf-dev should error when undefined-lib --project filters exclude all projects', async () => {
@@ -3219,6 +3228,9 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
     expect(stderr).toContain('@workspace/nested');
+    expect(stderr).toContain(
+      'Available workspace projects: @workspace/app, @workspace/nested, @workspace/shared',
+    );
   });
 
   test('mf-dev should error when nested undefined-lib --project filters exclude all projects', async () => {
