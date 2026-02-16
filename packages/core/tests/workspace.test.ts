@@ -348,6 +348,63 @@ describe('workspace projects resolver', () => {
     ]);
   });
 
+  test('trims project filters before matching', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const filteredProjects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: ['packages/*'],
+      },
+      projectFilters: ['  @scope/app  '],
+    });
+
+    expect(filteredProjects.map((project) => project.name)).toEqual([
+      '@scope/app',
+    ]);
+  });
+
+  test('throws when project filters contain empty entries', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: ['@scope/app', '  '],
+      }),
+    ).rejects.toThrowError('non-empty project name or pattern');
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: ['@scope/app', '  '],
+      }),
+    ).rejects.toThrowError('index 1');
+  });
+
   test('includes available project names when filters match nothing', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/shared/package.json': JSON.stringify({

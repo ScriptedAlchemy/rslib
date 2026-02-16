@@ -230,10 +230,22 @@ export const filterProjects = (
     return projects;
   }
 
-  const positivePatterns = projectFilters.filter(
+  const normalizedProjectFilters = projectFilters.map(
+    (projectFilter, index) => {
+      const trimmedFilter = projectFilter.trim();
+      if (!trimmedFilter) {
+        throw new Error(
+          `Expect every item in ${color.cyan('"--project"')} to be a non-empty project name or pattern, but received an empty value at index ${color.cyan(String(index))}.`,
+        );
+      }
+      return trimmedFilter;
+    },
+  );
+
+  const positivePatterns = normalizedProjectFilters.filter(
     (pattern) => !pattern.startsWith('!'),
   );
-  const negativePatterns = projectFilters
+  const negativePatterns = normalizedProjectFilters
     .filter((pattern) => pattern.startsWith('!'))
     .map((pattern) => pattern.slice(1));
 
@@ -255,7 +267,7 @@ export const filterProjects = (
       .map((project) => project.name)
       .sort();
     throw new Error(
-      `No projects found for filters: ${projectFilters.map((name) => color.cyan(name)).join(', ')}. Available workspace projects: ${availableProjectNames.map((name) => color.cyan(name)).join(', ')}.`,
+      `No projects found for filters: ${normalizedProjectFilters.map((name) => color.cyan(name)).join(', ')}. Available workspace projects: ${availableProjectNames.map((name) => color.cyan(name)).join(', ')}.`,
     );
   }
 

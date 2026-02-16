@@ -469,6 +469,20 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/shared');
   });
 
+  test('build should error when --project filter is empty', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(['build', '--project', ''], {
+      cwd: fixturePath,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('0');
+    expect(stderr).toContain('Available workspace projects');
+  });
+
   test('build should error when mixed project filters match nothing', async () => {
     const fixturePath = __dirname;
 
@@ -505,6 +519,20 @@ describe('workspace projects', () => {
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
+  });
+
+  test('inspect should error when --project filter is empty', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(['inspect', '--project', ''], {
+      cwd: fixturePath,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('0');
+    expect(stderr).toContain('Available workspace projects');
   });
 
   test('inspect should error when mixed project filters match nothing', async () => {
@@ -872,6 +900,20 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
     expect(stderr).toContain('@workspace/nested');
+  });
+
+  test('mf-dev should error when --project filter is empty', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(['mf-dev', '--project', ''], {
+      cwd: fixturePath,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('0');
+    expect(stderr).toContain('Available workspace projects');
   });
 
   test('mf-dev should error when undefined-lib --project filter matches nothing', async () => {
