@@ -1795,6 +1795,64 @@ describe('workspace projects resolver', () => {
     }
   });
 
+  test('preserves first-occurrence order when deduplicating no-child project patterns with undefined root lib in diagnostics', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
+        config: {
+          projects: [
+            'packages/z-empty/*',
+            'packages/a-empty/*',
+            '  packages/z-empty/*  ',
+          ],
+          // @ts-expect-error validate runtime behavior for explicitly undefined lib
+          lib: undefined,
+        },
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain(': packages/z-empty/*, packages/a-empty/*.');
+      expect(message).not.toContain(
+        ': packages/a-empty/*, packages/z-empty/*.',
+      );
+      expect(message).not.toContain(
+        'packages/z-empty/*, packages/a-empty/*, packages/z-empty/*',
+      );
+      expect(message).not.toContain('  packages/z-empty/*  ');
+    }
+  });
+
+  test('preserves first-occurrence order when deduplicating nested no-child project patterns with undefined child lib in diagnostics', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group/rslib.config.mjs': `export default { projects: ['apps-z/*', 'apps-a/*', '  apps-z/*  '], lib: undefined };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain(': apps-z/*, apps-a/*.');
+      expect(message).not.toContain(': apps-a/*, apps-z/*.');
+      expect(message).not.toContain('apps-z/*, apps-a/*, apps-z/*');
+      expect(message).not.toContain('  apps-z/*  ');
+    }
+  });
+
   test('deduplicates no-child project patterns when root lib is undefined', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/app/package.json': JSON.stringify({
