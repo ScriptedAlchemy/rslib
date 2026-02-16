@@ -481,6 +481,27 @@ describe('workspace projects resolver', () => {
     ).rejects.toThrowError('/rslib.config.mjs');
   });
 
+  test('includes config path in mixed projects/lib validation errors', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/a',
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.custom.mjs`,
+        config: {
+          projects: ['packages/*'],
+          // @ts-expect-error validate runtime guard for mixed mode
+          lib: [{ format: 'esm' }],
+        },
+      }),
+    ).rejects.toThrowError('rslib.config.custom.mjs');
+  });
+
   test('throws when projects contains non-string entries', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({
