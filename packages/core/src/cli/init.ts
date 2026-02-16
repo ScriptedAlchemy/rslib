@@ -163,6 +163,12 @@ const loadSingleProjectConfig = async (
     throw new WorkspaceConfigError();
   }
 
+  if (options.project?.length) {
+    throw new Error(
+      `The "--project" option can only be used with workspace projects config. Add "projects" to your root Rslib config.`,
+    );
+  }
+
   const config = loadedConfig as RslibConfig;
 
   if (configFilePath === null) {

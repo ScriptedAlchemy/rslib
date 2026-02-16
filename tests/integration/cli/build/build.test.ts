@@ -82,6 +82,17 @@ describe('build command', async () => {
     expect(fse.existsSync(path.join(__dirname, 'dist'))).toBe(false);
   });
 
+  test('--project should error in single-project mode', () => {
+    const { stderr, status } = runCliSync('build --project app', {
+      cwd: __dirname,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+    expect(status).toBe(1);
+    expect(stderr).toContain(
+      'The "--project" option can only be used with workspace projects config.',
+    );
+  });
+
   test('--config', async () => {
     await fse.remove(path.join(__dirname, 'dist'));
     runCliSync('build --config ./custom-config/rslib.config.custom.ts', {
