@@ -541,6 +541,33 @@ describe('workspace projects resolver', () => {
     ).rejects.toThrowError('to be a non-empty array in workspace mode');
   });
 
+  test('throws when nested workspace projects array is empty', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group/rslib.config.mjs': 'export default { projects: [] };',
+      'packages/group/apps/nested/package.json': JSON.stringify({
+        name: '@scope/nested',
+      }),
+      'packages/group/apps/nested/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      }),
+    ).rejects.toThrowError('to be a non-empty array in workspace mode');
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      }),
+    ).rejects.toThrowError('/packages/group/rslib.config.mjs');
+  });
+
   test('throws when workspace projects array is empty', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({

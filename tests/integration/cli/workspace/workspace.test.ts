@@ -448,6 +448,54 @@ describe('workspace projects', () => {
     expect(stderr).toContain('broken/invalid-nested-type/rslib.config.ts');
   });
 
+  test('should error for nested workspace empty projects array', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.invalidNestedEmptyProjects.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Expect "projects" to be a non-empty array');
+    expect(stderr).toContain('broken/invalid-nested-empty/rslib.config.ts');
+  });
+
+  test('inspect should error for nested workspace empty projects array', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.invalidNestedEmptyProjects.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Expect "projects" to be a non-empty array');
+    expect(stderr).toContain('broken/invalid-nested-empty/rslib.config.ts');
+  });
+
+  test('mf-dev should error for nested workspace empty projects array', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.invalidNestedEmptyProjects.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Expect "projects" to be a non-empty array');
+    expect(stderr).toContain('broken/invalid-nested-empty/rslib.config.ts');
+  });
+
   test('should error for empty workspace projects array', async () => {
     const fixturePath = __dirname;
 
