@@ -20,6 +20,36 @@ const createWorkspace = async (files: Record<string, string>) => {
   return root;
 };
 
+const withThrowingLocaleCompare = async <T>(
+  callback: () => Promise<T>,
+): Promise<T> => {
+  const localeCompareDescriptor = Object.getOwnPropertyDescriptor(
+    String.prototype,
+    'localeCompare',
+  );
+  const throwingLocaleCompare = () => {
+    throw new Error('String.prototype.localeCompare should not be called.');
+  };
+
+  Object.defineProperty(String.prototype, 'localeCompare', {
+    configurable: true,
+    writable: true,
+    value: throwingLocaleCompare,
+  });
+
+  try {
+    return await callback();
+  } finally {
+    if (localeCompareDescriptor) {
+      Object.defineProperty(
+        String.prototype,
+        'localeCompare',
+        localeCompareDescriptor,
+      );
+    }
+  }
+};
+
 afterEach(async () => {
   await Promise.all(tempDirs.splice(0).map((tempDir) => fse.remove(tempDir)));
 });
@@ -1456,21 +1486,7 @@ describe('workspace projects resolver', () => {
       'packages/a-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
     });
 
-    const localeCompareDescriptor = Object.getOwnPropertyDescriptor(
-      String.prototype,
-      'localeCompare',
-    );
-    const throwingLocaleCompare = () => {
-      throw new Error('String.prototype.localeCompare should not be called.');
-    };
-
-    Object.defineProperty(String.prototype, 'localeCompare', {
-      configurable: true,
-      writable: true,
-      value: throwingLocaleCompare,
-    });
-
-    try {
+    await withThrowingLocaleCompare(async () => {
       const projects = await resolveWorkspaceProjects({
         cwd: workspaceRoot,
         config: {
@@ -1482,15 +1498,83 @@ describe('workspace projects resolver', () => {
         '@scope/a-lib',
         '@scope/z-lib',
       ]);
-    } finally {
-      if (localeCompareDescriptor) {
-        Object.defineProperty(
-          String.prototype,
-          'localeCompare',
-          localeCompareDescriptor,
+    });
+  });
+
+  test('reports duplicated package diagnostics without relying on localeCompare', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/z/package.json': JSON.stringify({
+        name: '@scope/dup',
+      }),
+      'packages/z/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/dup',
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await withThrowingLocaleCompare(async () => {
+      try {
+        await resolveWorkspaceProjects({
+          cwd: workspaceRoot,
+          config: {
+            projects: ['packages/*'],
+          },
+        });
+        throw new Error('Expected resolveWorkspaceProjects to throw.');
+      } catch (error) {
+        const message = (error as Error).message;
+        const aConfigPath = path.join(
+          workspaceRoot,
+          'packages/a/rslib.config.mjs',
+        );
+        const zConfigPath = path.join(
+          workspaceRoot,
+          'packages/z/rslib.config.mjs',
+        );
+        expect(message).toContain('Duplicated package name');
+        expect(message).toContain(aConfigPath);
+        expect(message).toContain(zConfigPath);
+        expect(message.indexOf(aConfigPath)).toBeLessThan(
+          message.indexOf(zConfigPath),
         );
       }
-    }
+    });
+  });
+
+  test('reports duplicated fallback diagnostics without relying on localeCompare', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group-z/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/group-a/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await withThrowingLocaleCompare(async () => {
+      try {
+        await resolveWorkspaceProjects({
+          cwd: workspaceRoot,
+          config: {
+            projects: ['packages/**/common'],
+          },
+        });
+        throw new Error('Expected resolveWorkspaceProjects to throw.');
+      } catch (error) {
+        const message = (error as Error).message;
+        const aConfigPath = path.join(
+          workspaceRoot,
+          'packages/group-a/common/rslib.config.mjs',
+        );
+        const zConfigPath = path.join(
+          workspaceRoot,
+          'packages/group-z/common/rslib.config.mjs',
+        );
+        expect(message).toContain('Duplicated workspace project name');
+        expect(message).toContain(aConfigPath);
+        expect(message).toContain(zConfigPath);
+        expect(message.indexOf(aConfigPath)).toBeLessThan(
+          message.indexOf(zConfigPath),
+        );
+      }
+    });
   });
 
   test('throws on duplicated package names', async () => {
