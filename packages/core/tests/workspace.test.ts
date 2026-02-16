@@ -161,6 +161,32 @@ describe('workspace projects resolver', () => {
     expect(projects[0]?.configFilePath).toBe(absoluteConfigPath);
   });
 
+  test('supports absolute glob patterns in projects entries', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/a',
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/b/package.json': JSON.stringify({
+        name: '@scope/b',
+      }),
+      'packages/b/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const absoluteGlob = path.join(workspaceRoot, 'packages/*');
+    const projects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: [absoluteGlob],
+      },
+    });
+
+    expect(projects.map((project) => project.name)).toEqual([
+      '@scope/a',
+      '@scope/b',
+    ]);
+  });
+
   test('filters projects and can include local dependencies', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/shared/package.json': JSON.stringify({
