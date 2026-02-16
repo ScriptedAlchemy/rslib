@@ -131,6 +131,32 @@ describe('workspace projects', () => {
     );
   });
 
+  test('inspect accepts workspace config with undefined lib field', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      'inspect --config rslib.config.undefinedLibWorkspace.ts',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(
+      path.join(fixturePath, 'packages/app/dist/.rsbuild/rslib.config.mjs'),
+    );
+    await expectFile(
+      path.join(fixturePath, 'packages/shared/dist/.rsbuild/rslib.config.mjs'),
+    );
+    await expectFile(
+      path.join(
+        fixturePath,
+        'packages/group/apps/nested/dist/.rsbuild/rslib.config.mjs',
+      ),
+    );
+  });
+
   test('inspect --project works with workspace root config', async () => {
     const fixturePath = __dirname;
     await removeDistDirs(fixturePath);
@@ -321,6 +347,24 @@ describe('workspace projects', () => {
     expect(stderr).toContain(
       'The "mf-dev" command does not support workspace projects mode yet',
     );
+  });
+
+  test('mf-dev should treat undefined-lib workspace config as workspace mode', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.undefinedLibWorkspace.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain(
+      'The "mf-dev" command does not support workspace projects mode yet',
+    );
+    expect(stderr).not.toContain('cannot be used together');
   });
 
   test('mf-dev with --project should still error in workspace mode', async () => {
