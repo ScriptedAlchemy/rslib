@@ -33,6 +33,13 @@ const DEPENDENCY_FIELDS = [
   'devDependencies',
 ] as const;
 
+const compareStrings = (left: string, right: string): number => {
+  if (left === right) {
+    return 0;
+  }
+  return left < right ? -1 : 1;
+};
+
 const isLeafProjectConfig = (
   config: RslibUserConfig,
 ): config is RslibConfig => {
@@ -166,7 +173,7 @@ const resolveProjectEntryPaths = async (
       expandDirectories: false,
       ignore: ['**/node_modules/**', '**/.DS_Store'],
     });
-    return matchedPaths.sort();
+    return matchedPaths.sort(compareStrings);
   }
 
   if (!fs.existsSync(resolvedEntry)) {
@@ -282,7 +289,7 @@ export const filterProjects = (
   if (!filteredProjects.length) {
     const availableProjectNames = projects
       .map((project) => project.name)
-      .sort();
+      .sort(compareStrings);
     throw new Error(
       `No projects found for filters: ${uniqueProjectFilters.map((name) => color.cyan(name)).join(', ')}. Available workspace projects: ${availableProjectNames.map((name) => color.cyan(name)).join(', ')}.`,
     );
@@ -315,7 +322,7 @@ export const sortProjectsByDependencies = (
   const queue = projects
     .filter((project) => (inDegree.get(project.name) ?? 0) === 0)
     .map((project) => project.name)
-    .sort();
+    .sort(compareStrings);
 
   while (queue.length) {
     const projectName = queue.shift()!;
@@ -327,7 +334,7 @@ export const sortProjectsByDependencies = (
       inDegree.set(nextProjectName, currentInDegree - 1);
       if (currentInDegree - 1 === 0) {
         queue.push(nextProjectName);
-        queue.sort();
+        queue.sort(compareStrings);
       }
     }
   }
@@ -336,7 +343,7 @@ export const sortProjectsByDependencies = (
     const cycleProjects = projects
       .map((project) => project.name)
       .filter((projectName) => !sortedNames.includes(projectName));
-    cycleProjects.sort();
+    cycleProjects.sort(compareStrings);
     throw new Error(
       `Circular dependency detected in workspace projects: ${cycleProjects.map((name) => color.cyan(name)).join(', ')}.`,
     );
@@ -402,12 +409,12 @@ const linkProjectDependencies = (
 
   const duplicatedPackageEntry = Array.from(packageNameToProjects.entries())
     .filter(([, mappedProjects]) => mappedProjects.length > 1)
-    .sort(([left], [right]) => left.localeCompare(right))[0];
+    .sort(([left], [right]) => compareStrings(left, right))[0];
 
   if (duplicatedPackageEntry) {
     const [packageName, mappedProjects] = duplicatedPackageEntry;
     const sortedProjects = [...mappedProjects].sort((left, right) =>
-      left.configFilePath.localeCompare(right.configFilePath),
+      compareStrings(left.configFilePath, right.configFilePath),
     );
     throw new Error(
       `Duplicated package name ${color.cyan(packageName)} found in workspace project configs: ${sortedProjects.map((project) => color.cyan(project.configFilePath)).join(', ')}.`,
@@ -444,13 +451,11 @@ const validateProjectNames = (projects: ResolvedRslibProject[]): void => {
 
   const duplicatedProjectEntry = Array.from(projectNameToConfigPaths.entries())
     .filter(([, configPaths]) => configPaths.length > 1)
-    .sort(([left], [right]) => left.localeCompare(right))[0];
+    .sort(([left], [right]) => compareStrings(left, right))[0];
 
   if (duplicatedProjectEntry) {
     const [projectName, configPaths] = duplicatedProjectEntry;
-    const sortedConfigPaths = [...configPaths].sort((left, right) =>
-      left.localeCompare(right),
-    );
+    const sortedConfigPaths = [...configPaths].sort(compareStrings);
     throw new Error(
       `Duplicated workspace project name ${color.cyan(projectName)} found in configs: ${sortedConfigPaths.map((configPath) => color.cyan(configPath)).join(', ')}. Add unique package names in each child project's package.json.`,
     );
