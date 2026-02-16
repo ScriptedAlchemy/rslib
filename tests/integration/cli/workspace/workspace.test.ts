@@ -763,6 +763,23 @@ describe('workspace projects', () => {
     expect(stderr).not.toContain('No projects found for filters');
   });
 
+  test('build should select lexicographically first duplicated package group when multiple groups conflict', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.duplicatePackageMultipleGroups.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated package name');
+    expect(stderr).toContain('@workspace/a-dup');
+    expect(stderr).not.toContain('@workspace/z-dup');
+  });
+
   test('build should report duplicated fallback project config paths in deterministic order', async () => {
     const fixturePath = __dirname;
 
@@ -2033,6 +2050,23 @@ describe('workspace projects', () => {
     expect(stderr).not.toContain('No projects found for filters');
   });
 
+  test('inspect should select lexicographically first duplicated package group when multiple groups conflict', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.duplicatePackageMultipleGroups.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated package name');
+    expect(stderr).toContain('@workspace/a-dup');
+    expect(stderr).not.toContain('@workspace/z-dup');
+  });
+
   test('inspect should report duplicated fallback project config paths in deterministic order', async () => {
     const fixturePath = __dirname;
 
@@ -2812,6 +2846,23 @@ describe('workspace projects', () => {
     expect(status).toBe(1);
     expect(stderr).toContain('Duplicated package name');
     expect(stderr).not.toContain('No projects found for filters');
+  });
+
+  test('mf-dev should select lexicographically first duplicated package group when multiple groups conflict', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.duplicatePackageMultipleGroups.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated package name');
+    expect(stderr).toContain('@workspace/a-dup');
+    expect(stderr).not.toContain('@workspace/z-dup');
   });
 
   test('mf-dev should report duplicated fallback project config paths in deterministic order', async () => {
