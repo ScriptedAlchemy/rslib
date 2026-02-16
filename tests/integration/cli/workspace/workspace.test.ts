@@ -305,11 +305,43 @@ describe('workspace projects', () => {
     expect(stderr).toContain('index 1');
   });
 
+  test('inspect should error for non-string workspace project entries', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.invalidProjectsEntry.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('to be a string path or glob');
+    expect(stderr).toContain('received number');
+    expect(stderr).toContain('index 1');
+  });
+
   test('should error for empty workspace project entries', async () => {
     const fixturePath = __dirname;
 
     const { status, stderr } = runCliSync(
       'build --config rslib.config.emptyProjectsEntry.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('at least one non-empty project path or glob');
+  });
+
+  test('inspect should error for empty workspace project entries', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.emptyProjectsEntry.ts',
       {
         cwd: fixturePath,
         stdio: ['ignore', 'ignore', 'pipe'],
