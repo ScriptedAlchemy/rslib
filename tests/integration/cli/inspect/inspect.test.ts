@@ -104,4 +104,16 @@ describe('inspect command', async () => {
       'The "--project" option can only be used with workspace projects config.',
     );
   });
+
+  test('--project should error when config file is absent', () => {
+    const fixturePath = path.join(__dirname, 'no-config');
+    const { stderr, status } = runCliSync('inspect --project app', {
+      cwd: fixturePath,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+    expect(status).toBe(1);
+    expect(stderr).toContain(
+      'The "--project" option can only be used with workspace projects config.',
+    );
+  });
 });
