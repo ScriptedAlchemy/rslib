@@ -862,6 +862,37 @@ describe('workspace projects', () => {
     );
   });
 
+  test('build should select lexicographically first duplicated package group when multiple groups conflict before filters', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.duplicatePackageMultipleGroups.ts --project @workspace/z-dup',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    const aOneConfigPath =
+      'broken/duplicate-package-multiple-groups/packages/a-one/rslib.config.ts';
+    const aTwoConfigPath =
+      'broken/duplicate-package-multiple-groups/packages/a-two/rslib.config.ts';
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated package name');
+    expect(stderr).toContain('@workspace/a-dup');
+    expect(stderr).not.toContain('@workspace/z-dup');
+    expect(stderr).not.toContain('No projects found for filters');
+    expect(stderr).toContain(aOneConfigPath);
+    expect(stderr).toContain(aTwoConfigPath);
+    const duplicateMessage = stderr.slice(
+      stderr.indexOf('Duplicated package name'),
+    );
+    expect(duplicateMessage.indexOf(aOneConfigPath)).toBeLessThan(
+      duplicateMessage.indexOf(aTwoConfigPath),
+    );
+  });
+
   test('build should report duplicated fallback project config paths in deterministic order', async () => {
     const fixturePath = __dirname;
 
@@ -995,6 +1026,36 @@ describe('workspace projects', () => {
     expect(stderr).toContain('Duplicated workspace project name common');
     expect(stderr).not.toContain('Duplicated workspace project name shared');
     expect(stderr).not.toContain('packages/group-z/shared/rslib.config.ts');
+    expect(stderr).toContain(aCommonConfigPath);
+    expect(stderr).toContain(bCommonConfigPath);
+    const duplicateMessage = stderr.slice(
+      stderr.indexOf('Duplicated workspace project name'),
+    );
+    expect(duplicateMessage.indexOf(aCommonConfigPath)).toBeLessThan(
+      duplicateMessage.indexOf(bCommonConfigPath),
+    );
+  });
+
+  test('build should select lexicographically first duplicated fallback group when multiple groups conflict before filters', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.duplicateFallbackMultipleGroups.ts --project shared',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    const aCommonConfigPath =
+      'broken/duplicate-fallback-multiple-groups/packages/group-a/common/rslib.config.ts';
+    const bCommonConfigPath =
+      'broken/duplicate-fallback-multiple-groups/packages/group-b/common/rslib.config.ts';
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated workspace project name common');
+    expect(stderr).not.toContain('Duplicated workspace project name shared');
+    expect(stderr).not.toContain('No projects found for filters');
     expect(stderr).toContain(aCommonConfigPath);
     expect(stderr).toContain(bCommonConfigPath);
     const duplicateMessage = stderr.slice(
@@ -2330,6 +2391,37 @@ describe('workspace projects', () => {
     );
   });
 
+  test('inspect should select lexicographically first duplicated package group when multiple groups conflict before filters', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.duplicatePackageMultipleGroups.ts --project @workspace/z-dup',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    const aOneConfigPath =
+      'broken/duplicate-package-multiple-groups/packages/a-one/rslib.config.ts';
+    const aTwoConfigPath =
+      'broken/duplicate-package-multiple-groups/packages/a-two/rslib.config.ts';
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated package name');
+    expect(stderr).toContain('@workspace/a-dup');
+    expect(stderr).not.toContain('@workspace/z-dup');
+    expect(stderr).not.toContain('No projects found for filters');
+    expect(stderr).toContain(aOneConfigPath);
+    expect(stderr).toContain(aTwoConfigPath);
+    const duplicateMessage = stderr.slice(
+      stderr.indexOf('Duplicated package name'),
+    );
+    expect(duplicateMessage.indexOf(aOneConfigPath)).toBeLessThan(
+      duplicateMessage.indexOf(aTwoConfigPath),
+    );
+  });
+
   test('inspect should report duplicated fallback project config paths in deterministic order', async () => {
     const fixturePath = __dirname;
 
@@ -2463,6 +2555,36 @@ describe('workspace projects', () => {
     expect(stderr).toContain('Duplicated workspace project name common');
     expect(stderr).not.toContain('Duplicated workspace project name shared');
     expect(stderr).not.toContain('packages/group-z/shared/rslib.config.ts');
+    expect(stderr).toContain(aCommonConfigPath);
+    expect(stderr).toContain(bCommonConfigPath);
+    const duplicateMessage = stderr.slice(
+      stderr.indexOf('Duplicated workspace project name'),
+    );
+    expect(duplicateMessage.indexOf(aCommonConfigPath)).toBeLessThan(
+      duplicateMessage.indexOf(bCommonConfigPath),
+    );
+  });
+
+  test('inspect should select lexicographically first duplicated fallback group when multiple groups conflict before filters', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.duplicateFallbackMultipleGroups.ts --project shared',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    const aCommonConfigPath =
+      'broken/duplicate-fallback-multiple-groups/packages/group-a/common/rslib.config.ts';
+    const bCommonConfigPath =
+      'broken/duplicate-fallback-multiple-groups/packages/group-b/common/rslib.config.ts';
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated workspace project name common');
+    expect(stderr).not.toContain('Duplicated workspace project name shared');
+    expect(stderr).not.toContain('No projects found for filters');
     expect(stderr).toContain(aCommonConfigPath);
     expect(stderr).toContain(bCommonConfigPath);
     const duplicateMessage = stderr.slice(
@@ -3309,6 +3431,37 @@ describe('workspace projects', () => {
     );
   });
 
+  test('mf-dev should select lexicographically first duplicated package group when multiple groups conflict before filters', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.duplicatePackageMultipleGroups.ts --project @workspace/z-dup',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    const aOneConfigPath =
+      'broken/duplicate-package-multiple-groups/packages/a-one/rslib.config.ts';
+    const aTwoConfigPath =
+      'broken/duplicate-package-multiple-groups/packages/a-two/rslib.config.ts';
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated package name');
+    expect(stderr).toContain('@workspace/a-dup');
+    expect(stderr).not.toContain('@workspace/z-dup');
+    expect(stderr).not.toContain('No projects found for filters');
+    expect(stderr).toContain(aOneConfigPath);
+    expect(stderr).toContain(aTwoConfigPath);
+    const duplicateMessage = stderr.slice(
+      stderr.indexOf('Duplicated package name'),
+    );
+    expect(duplicateMessage.indexOf(aOneConfigPath)).toBeLessThan(
+      duplicateMessage.indexOf(aTwoConfigPath),
+    );
+  });
+
   test('mf-dev should report duplicated fallback project config paths in deterministic order', async () => {
     const fixturePath = __dirname;
 
@@ -3442,6 +3595,36 @@ describe('workspace projects', () => {
     expect(stderr).toContain('Duplicated workspace project name common');
     expect(stderr).not.toContain('Duplicated workspace project name shared');
     expect(stderr).not.toContain('packages/group-z/shared/rslib.config.ts');
+    expect(stderr).toContain(aCommonConfigPath);
+    expect(stderr).toContain(bCommonConfigPath);
+    const duplicateMessage = stderr.slice(
+      stderr.indexOf('Duplicated workspace project name'),
+    );
+    expect(duplicateMessage.indexOf(aCommonConfigPath)).toBeLessThan(
+      duplicateMessage.indexOf(bCommonConfigPath),
+    );
+  });
+
+  test('mf-dev should select lexicographically first duplicated fallback group when multiple groups conflict before filters', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.duplicateFallbackMultipleGroups.ts --project shared',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    const aCommonConfigPath =
+      'broken/duplicate-fallback-multiple-groups/packages/group-a/common/rslib.config.ts';
+    const bCommonConfigPath =
+      'broken/duplicate-fallback-multiple-groups/packages/group-b/common/rslib.config.ts';
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated workspace project name common');
+    expect(stderr).not.toContain('Duplicated workspace project name shared');
+    expect(stderr).not.toContain('No projects found for filters');
     expect(stderr).toContain(aCommonConfigPath);
     expect(stderr).toContain(bCommonConfigPath);
     const duplicateMessage = stderr.slice(
