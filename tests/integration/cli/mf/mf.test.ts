@@ -87,6 +87,18 @@ describe('mf-dev', () => {
     );
     expect(status).toBe(1);
   });
+
+  test('mf-dev --project should error in single-project mode', async () => {
+    const fixturePath = join(__dirname, 'dev');
+    const { stderr, status } = runCliSync('mf-dev --project app', {
+      cwd: fixturePath,
+      stdio: 'pipe',
+    });
+    expect(stderr).toContain(
+      'The "--project" option can only be used with workspace projects config.',
+    );
+    expect(status).toBe(1);
+  });
 });
 
 describe('mf build', () => {
