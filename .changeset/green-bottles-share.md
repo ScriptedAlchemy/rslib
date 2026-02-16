@@ -15,3 +15,4 @@ feat: add workspace `projects` orchestration mode for monorepos
 - deduplicate no-child diagnostic patterns for repeated workspace project entries while preserving first-occurrence order
 - deduplicate repeated `--project` filters in filter-miss diagnostics, report normalized filter patterns, and preserve first-occurrence order
 - list available workspace projects in filter-miss diagnostics using deterministic sorted order
+- list circular-dependency project names in diagnostics using deterministic sorted order
