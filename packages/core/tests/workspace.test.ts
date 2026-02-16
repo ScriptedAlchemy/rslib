@@ -2172,6 +2172,23 @@ describe('workspace projects resolver', () => {
     }
   });
 
+  test('throws duplicated fallback project name diagnostics before applying filters', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group-a/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/group-b/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/**/common'],
+        },
+        projectFilters: ['common'],
+      }),
+    ).rejects.toThrowError('Duplicated workspace project name');
+  });
+
   test('selects lexicographically first duplicated fallback project name when multiple groups conflict', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/group-z/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,

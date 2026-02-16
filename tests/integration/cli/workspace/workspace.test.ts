@@ -791,6 +791,22 @@ describe('workspace projects', () => {
     );
   });
 
+  test('build should report duplicated fallback diagnostics before filter selection', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.duplicateFallbackName.ts --project common',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated workspace project name');
+    expect(stderr).not.toContain('No projects found for filters');
+  });
+
   test('build should error when --project filter matches nothing', async () => {
     const fixturePath = __dirname;
 
@@ -2045,6 +2061,22 @@ describe('workspace projects', () => {
     );
   });
 
+  test('inspect should report duplicated fallback diagnostics before filter selection', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.duplicateFallbackName.ts --project common',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated workspace project name');
+    expect(stderr).not.toContain('No projects found for filters');
+  });
+
   test('inspect should error when --project filter is empty', async () => {
     const fixturePath = __dirname;
 
@@ -2808,6 +2840,22 @@ describe('workspace projects', () => {
     expect(duplicateMessage.indexOf(aConfigPath)).toBeLessThan(
       duplicateMessage.indexOf(zConfigPath),
     );
+  });
+
+  test('mf-dev should report duplicated fallback diagnostics before filter selection', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.duplicateFallbackName.ts --project common',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated workspace project name');
+    expect(stderr).not.toContain('No projects found for filters');
   });
 
   test('mf-dev should treat undefined-lib workspace config as workspace mode', async () => {
