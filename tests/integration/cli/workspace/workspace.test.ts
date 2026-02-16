@@ -288,6 +288,21 @@ describe('workspace projects', () => {
     expect(stderr).toContain('cannot be used together');
   });
 
+  test('should error for non-string workspace project entries', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.invalidProjectsEntry.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('to be a string path or glob');
+  });
+
   test('should error when a workspace project has no rslib config', async () => {
     const fixturePath = __dirname;
 
