@@ -1944,6 +1944,9 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
     expect(stderr).toContain('@workspace/nested');
+    expect(stderr).toContain(
+      'Available workspace projects: @workspace/app, @workspace/nested, @workspace/shared',
+    );
   });
 
   test('build should normalize undefined-lib negation filters in miss diagnostics', async () => {
@@ -1991,6 +1994,9 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
     expect(stderr).toContain('@workspace/nested');
+    expect(stderr).toContain(
+      'Available workspace projects: @workspace/app, @workspace/nested, @workspace/shared',
+    );
   });
 
   test('inspect should normalize undefined-lib negation filters in miss diagnostics', async () => {
@@ -3070,6 +3076,10 @@ describe('workspace projects', () => {
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
+    expect(stderr).toContain('@workspace/nested');
+    expect(stderr).toContain(
+      'Available workspace projects: @workspace/app, @workspace/nested, @workspace/shared',
+    );
   });
 
   test('mf-dev should normalize undefined-lib negation filters in miss diagnostics', async () => {

@@ -621,6 +621,36 @@ describe('workspace projects resolver', () => {
     }
   });
 
+  test('lists available projects in deterministic order on filter miss with undefined root lib', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/z-lib/package.json': JSON.stringify({
+        name: '@scope/z-lib',
+      }),
+      'packages/z-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/a-lib/package.json': JSON.stringify({
+        name: '@scope/a-lib',
+      }),
+      'packages/a-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+          // @ts-expect-error validate runtime behavior for explicitly undefined lib
+          lib: undefined,
+        },
+        projectFilters: ['@scope/missing'],
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      expect((error as Error).message).toContain(
+        'Available workspace projects: @scope/a-lib, @scope/z-lib',
+      );
+    }
+  });
+
   test('includes all filter patterns in filter miss diagnostics', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/shared/package.json': JSON.stringify({
