@@ -311,6 +311,34 @@ describe('workspace projects resolver', () => {
     ).rejects.toThrowError('Available workspace projects');
   });
 
+  test('lists available projects in deterministic order on filter miss', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/z-lib/package.json': JSON.stringify({
+        name: '@scope/z-lib',
+      }),
+      'packages/z-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/a-lib/package.json': JSON.stringify({
+        name: '@scope/a-lib',
+      }),
+      'packages/a-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: ['@scope/missing'],
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      expect((error as Error).message).toContain(
+        'Available workspace projects: @scope/a-lib, @scope/z-lib',
+      );
+    }
+  });
+
   test('throws on duplicated package names', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({
