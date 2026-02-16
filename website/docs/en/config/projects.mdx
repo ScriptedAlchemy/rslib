@@ -99,6 +99,7 @@ Repeated `--project` patterns are collapsed to normalized unique entries in firs
 - Each resolved workspace project name must be unique. Rslib uses `package.json` `name` as project identity when available, otherwise it falls back to the project directory name.
 - For duplicate package or project name validation errors, Rslib reports conflicting config file paths in deterministic sorted order.
 - If multiple duplicate-name groups exist, diagnostics consistently report the lexicographically first duplicated name group.
+- Duplicate package/project name validation runs before `--project` filtering, so duplicate diagnostics are reported instead of filter-miss diagnostics.
 - In workspace mode, currently supported commands are:
   - `rslib build`
   - `rslib inspect`
