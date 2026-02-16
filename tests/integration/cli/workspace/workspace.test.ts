@@ -890,6 +890,43 @@ describe('workspace projects', () => {
     expect(stderr).not.toContain('!   @workspace/shared');
   });
 
+  test('build should preserve first-occurrence order across multiple normalized unique filters in miss diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      [
+        'build',
+        '--project',
+        '  !@workspace/shared  ',
+        '--project',
+        '  @workspace/missing-b  ',
+        '--project',
+        '@workspace/missing-a',
+        '--project',
+        '!   @workspace/shared',
+        '--project',
+        '  @workspace/missing-a  ',
+      ],
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).toContain('@workspace/missing-b');
+    expect(stderr).toContain('@workspace/missing-a');
+    expect(stderr).toContain(
+      '!@workspace/shared, @workspace/missing-b, @workspace/missing-a',
+    );
+    expect(stderr).not.toContain(
+      '@workspace/missing-a, @workspace/missing-b, !@workspace/shared',
+    );
+    expect(stderr).not.toContain('!   @workspace/shared');
+  });
+
   test('build should deduplicate normalized negation-only filters in miss diagnostics', async () => {
     const fixturePath = __dirname;
 
@@ -1256,6 +1293,43 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/missing');
     expect(stderr).toContain('!@workspace/shared, @workspace/missing');
     expect(stderr).not.toContain('@workspace/missing, !@workspace/shared');
+    expect(stderr).not.toContain('!   @workspace/shared');
+  });
+
+  test('inspect should preserve first-occurrence order across multiple normalized unique filters in miss diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      [
+        'inspect',
+        '--project',
+        '  !@workspace/shared  ',
+        '--project',
+        '  @workspace/missing-b  ',
+        '--project',
+        '@workspace/missing-a',
+        '--project',
+        '!   @workspace/shared',
+        '--project',
+        '  @workspace/missing-a  ',
+      ],
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).toContain('@workspace/missing-b');
+    expect(stderr).toContain('@workspace/missing-a');
+    expect(stderr).toContain(
+      '!@workspace/shared, @workspace/missing-b, @workspace/missing-a',
+    );
+    expect(stderr).not.toContain(
+      '@workspace/missing-a, @workspace/missing-b, !@workspace/shared',
+    );
     expect(stderr).not.toContain('!   @workspace/shared');
   });
 
@@ -2324,6 +2398,43 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/missing');
     expect(stderr).toContain('!@workspace/shared, @workspace/missing');
     expect(stderr).not.toContain('@workspace/missing, !@workspace/shared');
+    expect(stderr).not.toContain('!   @workspace/shared');
+  });
+
+  test('mf-dev should preserve first-occurrence order across multiple normalized unique filters in miss diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      [
+        'mf-dev',
+        '--project',
+        '  !@workspace/shared  ',
+        '--project',
+        '  @workspace/missing-b  ',
+        '--project',
+        '@workspace/missing-a',
+        '--project',
+        '!   @workspace/shared',
+        '--project',
+        '  @workspace/missing-a  ',
+      ],
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).toContain('@workspace/missing-b');
+    expect(stderr).toContain('@workspace/missing-a');
+    expect(stderr).toContain(
+      '!@workspace/shared, @workspace/missing-b, @workspace/missing-a',
+    );
+    expect(stderr).not.toContain(
+      '@workspace/missing-a, @workspace/missing-b, !@workspace/shared',
+    );
     expect(stderr).not.toContain('!   @workspace/shared');
   });
 
