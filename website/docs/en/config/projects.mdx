@@ -71,6 +71,7 @@ So if a selected project depends on another local project, that dependency will 
 ## Notes
 
 - `projects` and `lib` cannot be used in the same config file.
+- Each resolved workspace project name must be unique. Rslib uses `package.json` `name` as project identity when available, otherwise it falls back to the project directory name.
 - In workspace mode, currently supported commands are:
   - `rslib build`
   - `rslib inspect`

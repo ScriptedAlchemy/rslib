@@ -132,6 +132,21 @@ describe('workspace projects', () => {
     expect(stderr).toContain('No projects found for filters');
   });
 
+  test('inspect should error when --project filters exclude all projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --project @workspace/app --project !@workspace/app',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+  });
+
   test('mf-dev should error in workspace mode', async () => {
     const fixturePath = __dirname;
 

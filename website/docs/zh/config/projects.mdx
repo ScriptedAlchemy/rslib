@@ -71,6 +71,7 @@ rslib inspect --project @scope/pkg-*
 ## 注意事项
 
 - 同一个配置文件中不能同时使用 `projects` 和 `lib`。
+- 解析后的工作区项目名必须唯一。Rslib 会优先使用 `package.json` 中的 `name` 作为项目标识；若不存在，则回退为项目目录名。
 - 工作区模式当前支持：
   - `rslib build`
   - `rslib inspect`
