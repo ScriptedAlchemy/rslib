@@ -116,6 +116,17 @@ function ensureLeafProjectConfig(
   config: RslibUserConfig,
   configFilePath: string,
 ): asserts config is RslibConfig {
+  const projectsField =
+    'projects' in config
+      ? (config as { projects: unknown }).projects
+      : undefined;
+
+  if (projectsField !== undefined && !Array.isArray(projectsField)) {
+    throw new Error(
+      `Expect ${color.cyan('"projects"')} to be a non-empty array in workspace mode in ${color.cyan(configFilePath)}.`,
+    );
+  }
+
   if (isWorkspaceConfig(config)) {
     throw new Error(
       `Cannot use nested workspace config ${color.cyan(configFilePath)} as a leaf project.`,

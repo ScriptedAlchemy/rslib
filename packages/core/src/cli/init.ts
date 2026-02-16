@@ -159,6 +159,17 @@ const loadSingleProjectConfig = async (
     root,
   );
 
+  const projectsField =
+    'projects' in loadedConfig
+      ? (loadedConfig as { projects: unknown }).projects
+      : undefined;
+
+  if (projectsField !== undefined && !Array.isArray(projectsField)) {
+    throw new Error(
+      `Expect "projects" to be a non-empty array in workspace mode.`,
+    );
+  }
+
   if (isWorkspaceConfig(loadedConfig)) {
     throw new WorkspaceConfigError();
   }

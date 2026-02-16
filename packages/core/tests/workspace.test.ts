@@ -490,6 +490,25 @@ describe('workspace projects resolver', () => {
     );
   });
 
+  test('throws when child config has invalid projects field type', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group/rslib.config.mjs': `export default { projects: 'apps/*' };`,
+      'packages/group/apps/nested/package.json': JSON.stringify({
+        name: '@scope/nested',
+      }),
+      'packages/group/apps/nested/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      }),
+    ).rejects.toThrowError('to be a non-empty array in workspace mode');
+  });
+
   test('throws when projects only contains empty entries', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({
