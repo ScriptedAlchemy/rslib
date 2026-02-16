@@ -716,6 +716,9 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/nested');
     expect(stderr).toContain('@workspace/shared');
+    expect(stderr).toContain(
+      'Available workspace projects: @workspace/app, @workspace/nested, @workspace/shared',
+    );
   });
 
   test('build should error when --project filter is empty', async () => {
@@ -776,6 +779,10 @@ describe('workspace projects', () => {
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
+    expect(stderr).toContain('@workspace/nested');
+    expect(stderr).toContain(
+      'Available workspace projects: @workspace/app, @workspace/nested, @workspace/shared',
+    );
   });
 
   test('build should normalize negation filters in miss diagnostics', async () => {
@@ -1899,6 +1906,10 @@ describe('workspace projects', () => {
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
+    expect(stderr).toContain('@workspace/nested');
+    expect(stderr).toContain(
+      'Available workspace projects: @workspace/app, @workspace/nested, @workspace/shared',
+    );
   });
 
   test('inspect should normalize negation filters in miss diagnostics', async () => {
@@ -2130,6 +2141,9 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
     expect(stderr).toContain('@workspace/nested');
+    expect(stderr).toContain(
+      'Available workspace projects: @workspace/app, @workspace/nested, @workspace/shared',
+    );
   });
 
   test('inspect should error when negation-only filters exclude all projects', async () => {
@@ -2147,6 +2161,9 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
     expect(stderr).toContain('@workspace/nested');
+    expect(stderr).toContain(
+      'Available workspace projects: @workspace/app, @workspace/nested, @workspace/shared',
+    );
   });
 
   test('build should error when nested undefined-lib filters exclude all projects', async () => {
@@ -2432,6 +2449,9 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
     expect(stderr).toContain('@workspace/nested');
+    expect(stderr).toContain(
+      'Available workspace projects: @workspace/app, @workspace/nested, @workspace/shared',
+    );
   });
 
   test('mf-dev should error when --project filter is empty', async () => {
@@ -2515,6 +2535,10 @@ describe('workspace projects', () => {
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
     expect(stderr).toContain('@workspace/shared');
+    expect(stderr).toContain('@workspace/nested');
+    expect(stderr).toContain(
+      'Available workspace projects: @workspace/app, @workspace/nested, @workspace/shared',
+    );
   });
 
   test('mf-dev should normalize negation filters in miss diagnostics', async () => {
