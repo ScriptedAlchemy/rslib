@@ -150,6 +150,7 @@ describe('workspace projects', () => {
     expect(stderr).toContain('No projects found for filters');
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
+    expect(stderr).toContain('@workspace/shared');
   });
 
   test('mf-dev should error in workspace mode', async () => {
