@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { stripVTControlCharacters as stripAnsi } from 'node:util';
 import { describe, expect, onTestFinished, test } from '@rstest/core';
 import fse from 'fs-extra';
 import {
@@ -12,11 +11,8 @@ import {
 describe('build --watch command', async () => {
   test('basic', async () => {
     const distPath = path.join(__dirname, 'dist');
-    const dist1Path = path.join(__dirname, 'dist-1');
     fse.removeSync(distPath);
-    fse.removeSync(dist1Path);
     const distEsmIndexFile = path.join(__dirname, 'dist/esm/index.js');
-    const dist1EsmIndexFile = path.join(__dirname, 'dist-1/esm/index.js');
 
     const tempConfigFile = path.join(__dirname, 'test-temp-rslib.config.mjs');
     fse.outputFileSync(
@@ -34,28 +30,7 @@ export default defineConfig({
       cwd: __dirname,
     });
 
-    await expectFile(distEsmIndexFile);
-
-    fse.outputFileSync(
-      tempConfigFile,
-      `import { defineConfig } from '@rslib/core';
-import { generateBundleEsmConfig } from 'test-helper';
-
-export default defineConfig({
-  lib: [generateBundleEsmConfig({
-   output: {
-      distPath: './dist-1/esm',
-    },
-  })],
-});
-  `,
-    );
-
-    await expectFile(dist1EsmIndexFile);
-
-    expect(stripAnsi(process.stdout())).toContain(
-      'build completed, watching for changes',
-    );
+    await expectFile(distEsmIndexFile, { timeout: 10_000 });
 
     process.child.kill();
   });

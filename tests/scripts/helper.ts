@@ -70,19 +70,24 @@ export const proxyConsole = (
 /**
  * A faster `expect.poll`
  */
-export const expectPoll: (fn: () => boolean) => ReturnType<typeof expect.poll> =
-  (fn) => {
-    return expect.poll(fn, {
-      intervals: [20, 30, 40, 50, 60, 70, 80, 90, 100],
-      timeout: process.env.CI ? 10_000 : 5_000,
-    });
-  };
+export const expectPoll = (
+  fn: () => boolean,
+  options?: {
+    timeout?: number;
+    intervals?: number[];
+  },
+): ReturnType<typeof expect.poll> => {
+  return expect.poll(fn, {
+    intervals: options?.intervals ?? [20, 30, 40, 50, 60, 70, 80, 90, 100],
+    timeout: options?.timeout ?? (process.env.CI ? 10_000 : 5_000),
+  });
+};
 
 /**
  * Expect a file to exist
  */
-export const expectFile = (dir: string) =>
-  expectPoll(() => fs.existsSync(dir)).toBeTruthy();
+export const expectFile = (dir: string, options?: { timeout?: number }) =>
+  expectPoll(() => fs.existsSync(dir), options).toBeTruthy();
 
 /**
  * Expect a file to exist and include specified content
@@ -90,6 +95,7 @@ export const expectFile = (dir: string) =>
 export const expectFileWithContent = (
   filePath: string,
   expectedContent: string,
+  options?: { timeout?: number },
 ) =>
   expectPoll(() => {
     try {
@@ -101,7 +107,7 @@ export const expectFileWithContent = (
     } catch {
       return false;
     }
-  }).toBeTruthy();
+  }, options).toBeTruthy();
 
 /**
  * Expect log output from child process
