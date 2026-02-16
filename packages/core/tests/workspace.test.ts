@@ -229,6 +229,24 @@ describe('workspace projects resolver', () => {
     ]);
   });
 
+  test('trims and ignores empty workspace project entries', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const projects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: ['   ', '  packages/*  '],
+      },
+    });
+
+    expect(projects.map((project) => project.name)).toEqual(['@scope/app']);
+  });
+
   test('filters projects and can include local dependencies', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/shared/package.json': JSON.stringify({
