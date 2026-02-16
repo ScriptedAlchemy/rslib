@@ -238,6 +238,15 @@ export const filterProjects = (
           `Expect every item in ${color.cyan('"--project"')} to be a non-empty project name or pattern, but received an empty value at index ${color.cyan(String(index))}.`,
         );
       }
+      if (trimmedFilter.startsWith('!')) {
+        const negationPattern = trimmedFilter.slice(1).trim();
+        if (!negationPattern) {
+          throw new Error(
+            `Expect every item in ${color.cyan('"--project"')} to be a non-empty project name or pattern, but received an empty negation pattern at index ${color.cyan(String(index))}.`,
+          );
+        }
+        return `!${negationPattern}`;
+      }
       return trimmedFilter;
     },
   );

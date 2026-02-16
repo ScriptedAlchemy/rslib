@@ -92,6 +92,31 @@ describe('workspace projects', () => {
     ).toBe(false);
   });
 
+  test('build --project accepts trimmed negation filter values', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      [
+        'build',
+        '--project',
+        '@workspace/*',
+        '--project',
+        '!  @workspace/nested  ',
+      ],
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(path.join(fixturePath, 'packages/shared/dist/index.mjs'));
+    await expectFile(path.join(fixturePath, 'packages/app/dist/index.mjs'));
+    expect(
+      fse.existsSync(path.join(fixturePath, 'packages/group/apps/nested/dist')),
+    ).toBe(false);
+  });
+
   test('build accepts trimmed workspace project entries', async () => {
     const fixturePath = __dirname;
     await removeDistDirs(fixturePath);
@@ -399,6 +424,40 @@ describe('workspace projects', () => {
     ).toBe(false);
   });
 
+  test('inspect --project accepts trimmed negation filter values', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      [
+        'inspect',
+        '--project',
+        '@workspace/*',
+        '--project',
+        '!  @workspace/nested  ',
+      ],
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(
+      path.join(fixturePath, 'packages/app/dist/.rsbuild/rslib.config.mjs'),
+    );
+    await expectFile(
+      path.join(fixturePath, 'packages/shared/dist/.rsbuild/rslib.config.mjs'),
+    );
+    expect(
+      fse.existsSync(
+        path.join(
+          fixturePath,
+          'packages/group/apps/nested/dist/.rsbuild/rslib.config.mjs',
+        ),
+      ),
+    ).toBe(false);
+  });
+
   test('build --project includes local workspace dependencies', async () => {
     const fixturePath = __dirname;
     await removeDistDirs(fixturePath);
@@ -535,6 +594,19 @@ describe('workspace projects', () => {
     expect(stderr).toContain('Available workspace projects');
   });
 
+  test('build should error when --project negation filter is empty', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(['build', '--project', '!   '], {
+      cwd: fixturePath,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('empty negation pattern');
+    expect(stderr).toContain('index 0');
+  });
+
   test('build should error when mixed project filters match nothing', async () => {
     const fixturePath = __dirname;
 
@@ -585,6 +657,19 @@ describe('workspace projects', () => {
     expect(stderr).toContain('No projects found for filters');
     expect(stderr).toContain('0');
     expect(stderr).toContain('Available workspace projects');
+  });
+
+  test('inspect should error when --project negation filter is empty', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(['inspect', '--project', '!   '], {
+      cwd: fixturePath,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('empty negation pattern');
+    expect(stderr).toContain('index 0');
   });
 
   test('inspect should error when mixed project filters match nothing', async () => {
@@ -966,6 +1051,19 @@ describe('workspace projects', () => {
     expect(stderr).toContain('No projects found for filters');
     expect(stderr).toContain('0');
     expect(stderr).toContain('Available workspace projects');
+  });
+
+  test('mf-dev should error when --project negation filter is empty', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(['mf-dev', '--project', '!   '], {
+      cwd: fixturePath,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('empty negation pattern');
+    expect(stderr).toContain('index 0');
   });
 
   test('mf-dev should error when undefined-lib --project filter matches nothing', async () => {

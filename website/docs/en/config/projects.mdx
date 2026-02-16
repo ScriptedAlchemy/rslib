@@ -75,6 +75,8 @@ rslib inspect --project @scope/pkg-*
 
 `--project` supports wildcard and negation patterns.
 Each `--project` value must be a non-empty string.
+For negation patterns, the value after `!` must also be non-empty (for example, `!@scope/legacy` is valid, while `!` is invalid).
+Rslib trims surrounding whitespace for each `--project` value before matching.
 
 When filtering projects:
 

@@ -373,6 +373,66 @@ describe('workspace projects resolver', () => {
     ]);
   });
 
+  test('trims negation project filters before matching', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/legacy/package.json': JSON.stringify({
+        name: '@scope/legacy',
+      }),
+      'packages/legacy/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const filteredProjects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: ['packages/*'],
+      },
+      projectFilters: ['@scope/*', '!  @scope/legacy  '],
+    });
+
+    expect(filteredProjects.map((project) => project.name)).toEqual([
+      '@scope/app',
+      '@scope/shared',
+    ]);
+  });
+
+  test('trims spaces after negation prefix before matching', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/legacy/package.json': JSON.stringify({
+        name: '@scope/legacy',
+      }),
+      'packages/legacy/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const filteredProjects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: ['packages/*'],
+      },
+      projectFilters: ['@scope/*', '!  @scope/legacy  '],
+    });
+
+    expect(filteredProjects.map((project) => project.name)).toEqual([
+      '@scope/app',
+      '@scope/shared',
+    ]);
+  });
+
   test('throws when project filters contain empty entries', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/shared/package.json': JSON.stringify({
@@ -401,6 +461,70 @@ describe('workspace projects resolver', () => {
           projects: ['packages/*'],
         },
         projectFilters: ['@scope/app', '  '],
+      }),
+    ).rejects.toThrowError('index 1');
+  });
+
+  test('throws when negation project filters are empty', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: ['@scope/app', '!   '],
+      }),
+    ).rejects.toThrowError('empty negation pattern');
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: ['@scope/app', '!   '],
+      }),
+    ).rejects.toThrowError('index 1');
+  });
+
+  test('throws when negation project filters are empty after "!"', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: ['@scope/app', '!   '],
+      }),
+    ).rejects.toThrowError('empty negation pattern');
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: ['@scope/app', '!   '],
       }),
     ).rejects.toThrowError('index 1');
   });
