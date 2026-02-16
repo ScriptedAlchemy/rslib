@@ -80,17 +80,22 @@ const readProjectPackageJson = (
   }
 };
 
-const ensureWorkspaceProjectConfig = (config: RslibWorkspaceConfig): void => {
+const ensureWorkspaceProjectConfig = (
+  config: RslibWorkspaceConfig,
+  configFilePath?: string,
+): void => {
+  const location = configFilePath ? ` in ${color.cyan(configFilePath)}` : '';
+
   if (!Array.isArray(config.projects) || config.projects.length === 0) {
     throw new Error(
-      `Expect ${color.cyan('"projects"')} to be a non-empty array in workspace mode.`,
+      `Expect ${color.cyan('"projects"')} to be a non-empty array in workspace mode${location}.`,
     );
   }
   let hasNonEmptyProjectEntry = false;
   for (const [index, projectEntry] of config.projects.entries()) {
     if (typeof projectEntry !== 'string') {
       throw new Error(
-        `Expect every item in ${color.cyan('"projects"')} to be a string path or glob, but received ${color.cyan(typeof projectEntry)} at index ${color.cyan(String(index))}.`,
+        `Expect every item in ${color.cyan('"projects"')} to be a string path or glob${location}, but received ${color.cyan(typeof projectEntry)} at index ${color.cyan(String(index))}.`,
       );
     }
     if (projectEntry.trim()) {
@@ -99,7 +104,7 @@ const ensureWorkspaceProjectConfig = (config: RslibWorkspaceConfig): void => {
   }
   if (!hasNonEmptyProjectEntry) {
     throw new Error(
-      `Expect ${color.cyan('"projects"')} to contain at least one non-empty project path or glob.`,
+      `Expect ${color.cyan('"projects"')} to contain at least one non-empty project path or glob${location}.`,
     );
   }
   if (
@@ -107,7 +112,7 @@ const ensureWorkspaceProjectConfig = (config: RslibWorkspaceConfig): void => {
     Array.isArray((config as Record<string, unknown>).lib)
   ) {
     throw new Error(
-      `The ${color.cyan('"projects"')} and ${color.cyan('"lib"')} fields cannot be used together in one config. Split them into a workspace config and child project configs.`,
+      `The ${color.cyan('"projects"')} and ${color.cyan('"lib"')} fields cannot be used together in one config${location}. Split them into a workspace config and child project configs.`,
     );
   }
 };
@@ -397,14 +402,16 @@ const collectWorkspaceProjects = async ({
   envMode,
   configLoader,
   resolvedConfigPaths,
+  configFilePath,
 }: {
   config: RslibWorkspaceConfig;
   cwd: string;
   envMode?: string;
   configLoader?: ConfigLoader;
   resolvedConfigPaths: Set<string>;
+  configFilePath?: string;
 }): Promise<ResolvedRslibProjectWithDependencyPackages[]> => {
-  ensureWorkspaceProjectConfig(config);
+  ensureWorkspaceProjectConfig(config, configFilePath);
 
   const workspaceRoot = config.root
     ? ensureAbsolutePath(cwd, config.root)
@@ -436,6 +443,7 @@ const collectWorkspaceProjects = async ({
           envMode,
           configLoader,
           resolvedConfigPaths,
+          configFilePath: filePath,
         });
         resolvedProjects.push(...nestedProjects);
         continue;
@@ -469,6 +477,7 @@ const collectWorkspaceProjects = async ({
 export type ResolveWorkspaceProjectsOptions = {
   config: RslibWorkspaceConfig;
   cwd: string;
+  configFilePath?: string;
   envMode?: string;
   configLoader?: ConfigLoader;
   projectFilters?: string[];
@@ -478,6 +487,7 @@ export type ResolveWorkspaceProjectsOptions = {
 export async function resolveWorkspaceProjects({
   config,
   cwd,
+  configFilePath,
   envMode,
   configLoader,
   projectFilters,
@@ -486,6 +496,7 @@ export async function resolveWorkspaceProjects({
   const resolvedProjects = await collectWorkspaceProjects({
     config,
     cwd,
+    configFilePath,
     envMode,
     configLoader,
     resolvedConfigPaths: new Set<string>(),

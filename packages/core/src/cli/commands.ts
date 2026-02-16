@@ -308,6 +308,13 @@ export function setupCommands(): void {
         await cliMfDev();
       } catch (err) {
         if (isWorkspaceConfigError(err)) {
+          const workspace = await initWorkspace({
+            options,
+            includeDependencies: false,
+          });
+          if (!workspace) {
+            throw err;
+          }
           throw new Error(
             'The "mf-dev" command does not support workspace projects mode yet. Run mf-dev in a specific child project.',
           );

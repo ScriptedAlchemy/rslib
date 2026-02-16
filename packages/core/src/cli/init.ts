@@ -261,6 +261,7 @@ export const initWorkspace = async ({
   const projects = await resolveWorkspaceProjects({
     config,
     cwd: root,
+    configFilePath,
     envMode: options.envMode,
     configLoader: options.configLoader,
     projectFilters: options.project,
