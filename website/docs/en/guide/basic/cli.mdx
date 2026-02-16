@@ -39,6 +39,9 @@ Rslib CLI provides several common flags that can be used with all commands:
 | `--no-env`                 | Disable loading of `.env` files                                                                                                                             |
 | `-r, --root <root>`        | Specify the project root directory, can be an absolute path or a path relative to cwd                                                                       |
 
+When using `--project` in workspace mode, Rslib trims each value before matching.  
+Each value must be non-empty, and negation values must include a non-empty pattern after `!` (for example, `!@scope/legacy`).
+
 ## rslib build
 
 The `rslib build` command will build the outputs for production in the `dist/` directory by default.
