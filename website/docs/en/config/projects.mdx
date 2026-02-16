@@ -36,6 +36,7 @@ If `projects` contains non-string values or only empty entries, Rslib throws an 
 When possible, the error message also includes the related config file path to help locate the invalid entry.
 
 If all project entries resolve to no child projects (for example, an unmatched glob), Rslib throws a `No child projects found from workspace projects` error.
+The error includes the unmatched entry patterns and, when possible, the related config file path.
 
 The same validation rules apply to nested workspace configs as well.
 If a nested child config is invalid, the error message includes that child config path.
