@@ -2827,6 +2827,7 @@ describe('workspace projects', () => {
     );
     expect(stderr).toContain('apps/*');
     expect(stderr).not.toContain('apps/*, apps/*');
+    expect(stderr).not.toContain('  apps/*  ');
   });
 
   test('inspect should deduplicate nested undefined-lib no-child project patterns in diagnostics', async () => {
@@ -2847,6 +2848,7 @@ describe('workspace projects', () => {
     );
     expect(stderr).toContain('apps/*');
     expect(stderr).not.toContain('apps/*, apps/*');
+    expect(stderr).not.toContain('  apps/*  ');
   });
 
   test('mf-dev should deduplicate nested undefined-lib no-child project patterns in diagnostics', async () => {
@@ -2867,6 +2869,7 @@ describe('workspace projects', () => {
     );
     expect(stderr).toContain('apps/*');
     expect(stderr).not.toContain('apps/*, apps/*');
+    expect(stderr).not.toContain('  apps/*  ');
   });
 
   test('should error for nested workspace empty projects array', async () => {
@@ -3172,6 +3175,7 @@ describe('workspace projects', () => {
     );
     expect(stderr).toContain('packages/empty/*');
     expect(stderr).not.toContain('packages/empty/*, packages/empty/*');
+    expect(stderr).not.toContain('  packages/empty/*  ');
   });
 
   test('inspect should deduplicate undefined-lib root no-child project patterns in diagnostics', async () => {
@@ -3192,6 +3196,7 @@ describe('workspace projects', () => {
     );
     expect(stderr).toContain('packages/empty/*');
     expect(stderr).not.toContain('packages/empty/*, packages/empty/*');
+    expect(stderr).not.toContain('  packages/empty/*  ');
   });
 
   test('mf-dev should deduplicate undefined-lib root no-child project patterns in diagnostics', async () => {
@@ -3212,6 +3217,7 @@ describe('workspace projects', () => {
     );
     expect(stderr).toContain('packages/empty/*');
     expect(stderr).not.toContain('packages/empty/*, packages/empty/*');
+    expect(stderr).not.toContain('  packages/empty/*  ');
   });
 
   test('inspect should normalize root no-child project patterns in diagnostics', async () => {
