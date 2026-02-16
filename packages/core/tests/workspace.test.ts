@@ -243,4 +243,20 @@ describe('workspace projects resolver', () => {
       }),
     ).rejects.toThrowError('cannot be used together');
   });
+
+  test('throws on duplicated fallback project names', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group-a/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/group-b/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/**/common'],
+        },
+      }),
+    ).rejects.toThrowError('Duplicated workspace project name');
+  });
 });

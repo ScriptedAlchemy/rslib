@@ -61,6 +61,11 @@ rslib inspect --project @scope/pkg-*
 
 `--project` 支持通配符和取反模式。
 
+使用项目过滤时：
+
+- `rslib build --project ...` 会自动补齐所选项目的本地工作区依赖，并按依赖顺序构建。
+- `rslib inspect --project ...` 仅检查被选中的项目。
+
 ## 注意事项
 
 - 同一个配置文件中不能同时使用 `projects` 和 `lib`。

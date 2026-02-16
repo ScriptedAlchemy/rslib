@@ -61,6 +61,11 @@ rslib inspect --project @scope/pkg-*
 
 `--project` supports wildcard and negation patterns.
 
+When filtering projects:
+
+- `rslib build --project ...` automatically includes local workspace dependencies of selected projects, then builds in dependency order.
+- `rslib inspect --project ...` only inspects the selected projects.
+
 ## Notes
 
 - `projects` and `lib` cannot be used in the same config file.
