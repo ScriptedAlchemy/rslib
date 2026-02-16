@@ -483,4 +483,23 @@ describe('workspace projects resolver', () => {
       }),
     ).rejects.toThrowError('No child projects found from workspace projects');
   });
+
+  test('throws when a resolved project has no config file', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/b/package.json': JSON.stringify({
+        name: '@scope/b',
+      }),
+      'packages/b/src/index.ts': `export const value = 'b';`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      }),
+    ).rejects.toThrowError('Cannot find config file in');
+  });
 });
