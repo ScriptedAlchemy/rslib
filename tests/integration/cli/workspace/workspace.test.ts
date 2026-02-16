@@ -48,6 +48,25 @@ describe('workspace projects', () => {
     );
   });
 
+  test('build --project works with workspace root config', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      'build --config rslib.config.rooted.ts --project @workspace/app',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(path.join(fixturePath, 'packages/shared/dist/index.mjs'));
+    await expectFile(path.join(fixturePath, 'packages/app/dist/index.mjs'));
+    expect(
+      fse.existsSync(path.join(fixturePath, 'packages/group/apps/nested/dist')),
+    ).toBe(false);
+  });
+
   test('build --project includes local workspace dependencies', async () => {
     const fixturePath = __dirname;
     await removeDistDirs(fixturePath);
