@@ -138,6 +138,29 @@ describe('workspace projects resolver', () => {
     expect(projects.map((project) => project.name)).toEqual(['@scope/shared']);
   });
 
+  test('supports absolute config file paths in projects entries', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const absoluteConfigPath = path.join(
+      workspaceRoot,
+      'packages/shared/rslib.config.mjs',
+    );
+    const projects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: [absoluteConfigPath],
+      },
+    });
+
+    expect(projects.map((project) => project.name)).toEqual(['@scope/shared']);
+    expect(projects[0]?.configFilePath).toBe(absoluteConfigPath);
+  });
+
   test('filters projects and can include local dependencies', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/shared/package.json': JSON.stringify({
