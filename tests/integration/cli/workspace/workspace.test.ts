@@ -67,6 +67,25 @@ describe('workspace projects', () => {
     ).toBe(false);
   });
 
+  test('build accepts trimmed workspace project entries', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      'build --config rslib.config.trimmedProjectsEntry.ts',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(path.join(fixturePath, 'packages/shared/dist/index.mjs'));
+    await expectFile(path.join(fixturePath, 'packages/app/dist/index.mjs'));
+    await expectFile(
+      path.join(fixturePath, 'packages/group/apps/nested/dist/index.mjs'),
+    );
+  });
+
   test('inspect --project works with workspace root config', async () => {
     const fixturePath = __dirname;
     await removeDistDirs(fixturePath);
