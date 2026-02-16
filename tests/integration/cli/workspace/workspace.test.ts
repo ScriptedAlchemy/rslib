@@ -67,6 +67,39 @@ describe('workspace projects', () => {
     ).toBe(false);
   });
 
+  test('inspect --project works with workspace root config', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      'inspect --config rslib.config.rooted.ts --project @workspace/app',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(
+      path.join(fixturePath, 'packages/app/dist/.rsbuild/rslib.config.mjs'),
+    );
+    expect(
+      fse.existsSync(
+        path.join(
+          fixturePath,
+          'packages/shared/dist/.rsbuild/rslib.config.mjs',
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      fse.existsSync(
+        path.join(
+          fixturePath,
+          'packages/group/apps/nested/dist/.rsbuild/rslib.config.mjs',
+        ),
+      ),
+    ).toBe(false);
+  });
+
   test('build --project includes local workspace dependencies', async () => {
     const fixturePath = __dirname;
     await removeDistDirs(fixturePath);
