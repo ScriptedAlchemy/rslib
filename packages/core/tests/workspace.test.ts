@@ -490,6 +490,26 @@ describe('workspace projects resolver', () => {
     );
   });
 
+  test('includes root config path in non-string projects error', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/a',
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
+        config: {
+          // @ts-expect-error validate runtime guard for non-string entries
+          projects: ['packages/*', 123],
+        },
+      }),
+    ).rejects.toThrowError('/rslib.config.mjs');
+  });
+
   test('throws when child config has invalid projects field type', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/group/rslib.config.mjs': `export default { projects: 'apps/*' };`,
@@ -520,11 +540,21 @@ describe('workspace projects resolver', () => {
     await expect(() =>
       resolveWorkspaceProjects({
         cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
         config: {
           projects: [],
         },
       }),
     ).rejects.toThrowError('to be a non-empty array in workspace mode');
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
+        config: {
+          projects: [],
+        },
+      }),
+    ).rejects.toThrowError('/rslib.config.mjs');
   });
 
   test('includes config file path in top-level workspace validation errors', async () => {
