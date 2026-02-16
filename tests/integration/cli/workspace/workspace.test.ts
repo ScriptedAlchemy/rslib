@@ -528,6 +528,60 @@ describe('workspace projects', () => {
     expect(stderr).toContain('broken/invalid-nested-mixed/rslib.config.ts');
   });
 
+  test('should error for nested workspace patterns with no child projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.invalidNestedNoChildren.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain(
+      'broken/invalid-nested-no-children/rslib.config.ts',
+    );
+  });
+
+  test('inspect should error for nested workspace patterns with no child projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.invalidNestedNoChildren.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain(
+      'broken/invalid-nested-no-children/rslib.config.ts',
+    );
+  });
+
+  test('mf-dev should error for nested workspace patterns with no child projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.invalidNestedNoChildren.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain(
+      'broken/invalid-nested-no-children/rslib.config.ts',
+    );
+  });
+
   test('should error for nested workspace empty projects array', async () => {
     const fixturePath = __dirname;
 

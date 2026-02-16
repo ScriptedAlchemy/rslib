@@ -589,6 +589,29 @@ describe('workspace projects resolver', () => {
     ).rejects.toThrowError('/packages/group/rslib.config.mjs');
   });
 
+  test('throws when nested workspace project patterns resolve to no children', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group/rslib.config.mjs': `export default { projects: ['apps/*'] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      }),
+    ).rejects.toThrowError('No child projects found from workspace projects');
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      }),
+    ).rejects.toThrowError('/packages/group/rslib.config.mjs');
+  });
+
   test('throws when workspace projects array is empty', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({

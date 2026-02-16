@@ -213,6 +213,16 @@ const resolvePattern = (pattern: string): RegExp => {
   return new RegExp(`^${escaped}$`);
 };
 
+const throwNoChildProjectsError = (
+  projects: string[],
+  configFilePath?: string,
+): never => {
+  const location = configFilePath ? ` in ${color.cyan(configFilePath)}` : '';
+  throw new Error(
+    `No child projects found from workspace projects${location}: ${projects.map((entry) => color.cyan(entry)).join(', ')}.`,
+  );
+};
+
 export const filterProjects = (
   projects: ResolvedRslibProject[],
   projectFilters?: string[],
@@ -417,12 +427,16 @@ const collectWorkspaceProjects = async ({
     ? ensureAbsolutePath(cwd, config.root)
     : cwd;
   const resolvedProjects: ResolvedRslibProjectWithDependencyPackages[] = [];
+  let hasResolvedProjectPath = false;
 
   for (const projectEntry of config.projects) {
     const projectPaths = await resolveProjectEntryPaths(
       projectEntry,
       workspaceRoot,
     );
+    if (projectPaths.length > 0) {
+      hasResolvedProjectPath = true;
+    }
 
     for (const projectPath of projectPaths) {
       const { content, filePath } = await loadProjectConfig({
@@ -471,6 +485,10 @@ const collectWorkspaceProjects = async ({
     }
   }
 
+  if (!resolvedProjects.length && !hasResolvedProjectPath) {
+    throwNoChildProjectsError(config.projects, configFilePath);
+  }
+
   return resolvedProjects;
 };
 
@@ -503,10 +521,7 @@ export async function resolveWorkspaceProjects({
   });
 
   if (!resolvedProjects.length) {
-    const location = configFilePath ? ` in ${color.cyan(configFilePath)}` : '';
-    throw new Error(
-      `No child projects found from workspace projects${location}: ${config.projects.map((entry) => color.cyan(entry)).join(', ')}.`,
-    );
+    throwNoChildProjectsError(config.projects, configFilePath);
   }
 
   const projectsWithDependencies = linkProjectDependencies(resolvedProjects);
