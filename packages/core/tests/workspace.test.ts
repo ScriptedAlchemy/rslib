@@ -1505,6 +1505,29 @@ describe('workspace projects resolver', () => {
     }
   });
 
+  test('throws duplicated package name diagnostics before applying filters', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/z/package.json': JSON.stringify({
+        name: '@scope/dup',
+      }),
+      'packages/z/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/dup',
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: ['@scope/dup'],
+      }),
+    ).rejects.toThrowError('Duplicated package name');
+  });
+
   test('throws on circular dependencies', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({

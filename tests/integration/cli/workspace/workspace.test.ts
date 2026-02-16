@@ -747,6 +747,22 @@ describe('workspace projects', () => {
     );
   });
 
+  test('build should report duplicated package diagnostics before filter selection', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.duplicatePackage.ts --project @workspace/dup',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated package name');
+    expect(stderr).not.toContain('No projects found for filters');
+  });
+
   test('build should report duplicated fallback project config paths in deterministic order', async () => {
     const fixturePath = __dirname;
 
@@ -1985,6 +2001,22 @@ describe('workspace projects', () => {
     );
   });
 
+  test('inspect should report duplicated package diagnostics before filter selection', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.duplicatePackage.ts --project @workspace/dup',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated package name');
+    expect(stderr).not.toContain('No projects found for filters');
+  });
+
   test('inspect should report duplicated fallback project config paths in deterministic order', async () => {
     const fixturePath = __dirname;
 
@@ -2732,6 +2764,22 @@ describe('workspace projects', () => {
     expect(duplicateMessage.indexOf(aConfigPath)).toBeLessThan(
       duplicateMessage.indexOf(zConfigPath),
     );
+  });
+
+  test('mf-dev should report duplicated package diagnostics before filter selection', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.duplicatePackage.ts --project @workspace/dup',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Duplicated package name');
+    expect(stderr).not.toContain('No projects found for filters');
   });
 
   test('mf-dev should report duplicated fallback project config paths in deterministic order', async () => {
