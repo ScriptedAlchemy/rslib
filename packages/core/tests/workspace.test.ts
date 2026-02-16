@@ -488,6 +488,24 @@ describe('workspace projects resolver', () => {
     ).rejects.toThrowError('to be a string path or glob');
   });
 
+  test('throws when projects only contains empty entries', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/a',
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['   ', '\n\t'],
+        },
+      }),
+    ).rejects.toThrowError('to contain at least one non-empty project path');
+  });
+
   test('throws on duplicated fallback project names', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/group-a/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
