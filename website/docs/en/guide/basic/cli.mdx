@@ -74,7 +74,7 @@ If the [Rslib configuration file](/guide/basic/configure-rslib#configuration-fil
 :::note
 When [projects](/config/projects) is configured for workspace mode, `rslib build` orchestrates all matched child projects and builds them in dependency order.  
 If `--project` filters match no workspace projects (including negation-only filters that exclude everything), Rslib reports the filter miss and prints available workspace project names.
-If repeated `--project` filters are provided, the filter-miss diagnostics print unique patterns only.
+If repeated `--project` filters are provided, the filter-miss diagnostics print normalized unique patterns only.
 In workspace mode, `build --watch` is not supported yet.
 :::
 
@@ -142,7 +142,7 @@ Inspect config succeed, open following files to view the content:
 :::note
 When [projects](/config/projects) is configured for workspace mode, `rslib inspect` runs for each matched child project.
 If `--project` filters match no workspace projects, Rslib reports the filter miss and prints available workspace project names.
-If repeated `--project` filters are provided, the filter-miss diagnostics print unique patterns only.
+If repeated `--project` filters are provided, the filter-miss diagnostics print normalized unique patterns only.
 :::
 
 ### Verbose content
@@ -179,5 +179,5 @@ This enables you to develop and debug your mf format module within the host app.
 `rslib mf-dev` is currently only available for single-project mode.  
 When [projects](/config/projects) is configured in workspace mode, `mf-dev` is not supported yet.
 If you pass `--project` in workspace mode and no projects match, Rslib reports the filter miss and lists available workspace project names.
-If repeated `--project` filters are provided, the filter-miss diagnostics print unique patterns only.
+If repeated `--project` filters are provided, the filter-miss diagnostics print normalized unique patterns only.
 :::
