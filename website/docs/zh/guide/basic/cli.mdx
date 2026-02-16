@@ -167,3 +167,8 @@ Inspect config succeed, open following files to view the content:
 `rslib mf-dev` 命令用于为 [Module Federation](/guide/advanced/module-federation) 格式的库启动 Rsbuild 开发服务器。
 
 这允许你在 host 应用中访问和调试 mf 格式的模块。
+
+:::note
+`rslib mf-dev` 目前仅支持单项目模式。  
+当配置了 [projects](/config/projects) 工作区模式后，暂不支持 `mf-dev`。
+:::
