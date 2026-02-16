@@ -322,4 +322,40 @@ describe('workspace projects resolver', () => {
     expect(projects.map((project) => project.name)).toEqual(['@scope/app']);
     expect(projects).toHaveLength(1);
   });
+
+  test('throws when a project entry path does not exist', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/app', 'packages/not-found'],
+        },
+      }),
+    ).rejects.toThrowError(`Can't resolve project "packages/not-found"`);
+  });
+
+  test('throws when project patterns resolve to no child projects', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/empty/*'],
+        },
+      }),
+    ).rejects.toThrowError('No child projects found from workspace projects');
+  });
 });
