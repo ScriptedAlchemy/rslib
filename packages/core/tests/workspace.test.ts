@@ -1525,6 +1525,7 @@ describe('workspace projects resolver', () => {
     } catch (error) {
       const message = (error as Error).message;
       expect(message).toContain(': apps-z/*, apps-a/*.');
+      expect(message).toContain('/packages/group/rslib.config.mjs');
       expect(message).not.toContain(': apps-a/*, apps-z/*.');
       expect(message).not.toContain('apps-z/*, apps-a/*, apps-z/*');
       expect(message).not.toContain('  apps-z/*  ');
@@ -1807,6 +1808,7 @@ describe('workspace projects resolver', () => {
     } catch (error) {
       const message = (error as Error).message;
       expect(message).toContain(': packages/z-empty/*, packages/a-empty/*.');
+      expect(message).toContain('/rslib.config.mjs');
       expect(message).not.toContain(
         ': packages/a-empty/*, packages/z-empty/*.',
       );
@@ -1843,6 +1845,7 @@ describe('workspace projects resolver', () => {
     } catch (error) {
       const message = (error as Error).message;
       expect(message).toContain(': packages/z-empty/*, packages/a-empty/*.');
+      expect(message).toContain('/rslib.config.mjs');
       expect(message).not.toContain(
         ': packages/a-empty/*, packages/z-empty/*.',
       );
@@ -1869,6 +1872,7 @@ describe('workspace projects resolver', () => {
     } catch (error) {
       const message = (error as Error).message;
       expect(message).toContain(': apps-z/*, apps-a/*.');
+      expect(message).toContain('/packages/group/rslib.config.mjs');
       expect(message).not.toContain(': apps-a/*, apps-z/*.');
       expect(message).not.toContain('apps-z/*, apps-a/*, apps-z/*');
       expect(message).not.toContain('  apps-z/*  ');
