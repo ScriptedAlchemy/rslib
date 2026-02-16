@@ -9,7 +9,14 @@ import {
 import type { Format, Syntax } from '../types';
 import { color } from '../utils/color';
 import { logger } from '../utils/logger';
-import { init } from './init';
+import {
+  applyCliOptions,
+  cloneRslibConfig,
+  init,
+  initWithConfig,
+  initWorkspace,
+  isWorkspaceConfigError,
+} from './init';
 
 const RSPACK_BUILD_ERROR = 'Rspack build failed.';
 
@@ -20,6 +27,7 @@ export type CommonOptions = {
   env?: boolean;
   envDir?: string;
   envMode?: string;
+  project?: string[];
   lib?: string[];
   logLevel?: LogLevel;
 };
@@ -78,6 +86,14 @@ const applyCommonOptions = (cli: CAC) => {
     .option(
       '--lib <id>',
       'specify the library (repeatable, e.g. --lib esm --lib cjs)',
+      {
+        type: [String],
+        default: [],
+      },
+    )
+    .option(
+      '--project <name>',
+      'specify the workspace project (repeatable, supports wildcard and negation)',
       {
         type: [String],
         default: [],
@@ -142,6 +158,39 @@ export function setupCommands(): void {
       'use specific tsconfig (relative to project root)',
     )
     .action(async (options: BuildOptions) => {
+      const buildWorkspaceProjects = async () => {
+        const workspace = await initWorkspace({
+          options,
+          includeDependencies: true,
+        });
+
+        if (!workspace) {
+          throw new Error('Workspace projects config is not found.');
+        }
+
+        if (options.watch) {
+          throw new Error(
+            'The "build --watch" command does not support workspace projects mode yet. Run watch in a specific child project.',
+          );
+        }
+
+        for (const project of workspace.projects) {
+          logger.info(
+            `building workspace project ${color.cyan(project.name)} ${color.dim(`(${project.root})`)}`,
+          );
+
+          const projectConfig = cloneRslibConfig(project.config);
+          applyCliOptions(projectConfig, options, project.root);
+          const rslib = await initWithConfig({
+            options,
+            root: project.root,
+            config: projectConfig,
+          });
+          const buildInstance = await rslib.build(options);
+          await buildInstance.close();
+        }
+      };
+
       try {
         const cliBuild = async () => {
           const rslib = await init(options);
@@ -161,7 +210,15 @@ export function setupCommands(): void {
           }
         };
 
-        await cliBuild();
+        try {
+          await cliBuild();
+        } catch (err) {
+          if (isWorkspaceConfigError(err)) {
+            await buildWorkspaceProjects();
+            return;
+          }
+          throw err;
+        }
       } catch (err) {
         const isRspackError =
           err instanceof Error && err.message === RSPACK_BUILD_ERROR;
@@ -186,14 +243,47 @@ export function setupCommands(): void {
     .option('--verbose', 'show full function definitions in output')
     .action(async (options: InspectOptions) => {
       try {
-        const rslib = await init(options);
-        await rslib.inspectConfig({
-          lib: options.lib,
-          mode: options.mode,
-          outputPath: options.output,
-          verbose: options.verbose,
-          writeToDisk: true,
-        });
+        try {
+          const rslib = await init(options);
+          await rslib.inspectConfig({
+            lib: options.lib,
+            mode: options.mode,
+            outputPath: options.output,
+            verbose: options.verbose,
+            writeToDisk: true,
+          });
+        } catch (err) {
+          if (!isWorkspaceConfigError(err)) {
+            throw err;
+          }
+
+          const workspace = await initWorkspace({
+            options,
+            includeDependencies: false,
+          });
+
+          if (!workspace) {
+            throw err;
+          }
+
+          for (const project of workspace.projects) {
+            logger.info(
+              `inspecting workspace project ${color.cyan(project.name)} ${color.dim(`(${project.root})`)}`,
+            );
+            const rslib = await initWithConfig({
+              options,
+              root: project.root,
+              config: cloneRslibConfig(project.config),
+            });
+            await rslib.inspectConfig({
+              lib: options.lib,
+              mode: options.mode,
+              outputPath: options.output,
+              verbose: options.verbose,
+              writeToDisk: true,
+            });
+          }
+        }
       } catch (err) {
         logger.error('Failed to inspect config.');
         logger.error(err);
@@ -214,7 +304,16 @@ export function setupCommands(): void {
         });
       };
 
-      await cliMfDev();
+      try {
+        await cliMfDev();
+      } catch (err) {
+        if (isWorkspaceConfigError(err)) {
+          throw new Error(
+            'The "mf-dev" command does not support workspace projects mode yet. Run mf-dev in a specific child project.',
+          );
+        }
+        throw err;
+      }
     } catch (err) {
       logger.error('Failed to start mf-dev.');
       logger.error(err);

@@ -411,3 +411,12 @@ export interface RslibConfig extends RsbuildConfig {
     envFilePaths?: string[];
   };
 }
+
+export interface RslibWorkspaceConfig extends RsbuildConfig {
+  /**
+   * A list of paths or glob patterns that match child Rslib projects.
+   */
+  projects: string[];
+}
+
+export type RslibUserConfig = RslibConfig | RslibWorkspaceConfig;

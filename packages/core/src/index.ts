@@ -33,6 +33,8 @@ export type {
   Redirect,
   RslibConfig,
   RslibInstance,
+  RslibUserConfig,
+  RslibWorkspaceConfig,
   Shims,
   StartMFDevServerOptions,
   StartServerResult,

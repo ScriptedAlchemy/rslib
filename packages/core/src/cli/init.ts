@@ -2,21 +2,47 @@ import path from 'node:path';
 import type { RsbuildEntry } from '@rsbuild/core';
 import { createRslib } from '../createRslib';
 import { loadConfig as baseLoadConfig } from '../loadConfig';
+import { mergeRslibConfig } from '../mergeConfig';
 import type {
   LibConfig,
   RsbuildConfigOutputTarget,
   RslibConfig,
   RslibInstance,
+  RslibUserConfig,
+  RslibWorkspaceConfig,
 } from '../types';
 import { ensureAbsolutePath } from '../utils/helper';
 import { logger } from '../utils/logger';
+import {
+  isWorkspaceConfig,
+  type ResolvedRslibProject,
+  resolveWorkspaceProjects,
+} from '../workspace';
 import type { BuildOptions, CommonOptions } from './commands';
+
+export class WorkspaceConfigError extends Error {
+  constructor() {
+    super('Workspace projects config detected.');
+    this.name = 'WorkspaceConfigError';
+  }
+}
+
+export const isWorkspaceConfigError = (
+  error: unknown,
+): error is WorkspaceConfigError => {
+  return error instanceof WorkspaceConfigError;
+};
 
 const getEnvDir = (cwd: string, envDir?: string) => {
   if (envDir) {
     return path.isAbsolute(envDir) ? envDir : path.resolve(cwd, envDir);
   }
   return cwd;
+};
+
+export const resolveCliRoot = (options: CommonOptions): string => {
+  const cwd = process.cwd();
+  return options.root ? ensureAbsolutePath(cwd, options.root) : cwd;
 };
 
 export const parseEntryOption = (
@@ -110,13 +136,34 @@ export const applyCliOptions = (
   }
 };
 
-const loadConfig = async (options: CommonOptions, root: string) => {
+const loadRawConfig = async (
+  options: CommonOptions,
+  root: string,
+): Promise<{ config: RslibUserConfig; configFilePath: string | null }> => {
   const { content: config, filePath: configFilePath } = await baseLoadConfig({
     cwd: root,
     path: options.config,
     envMode: options.envMode,
     loader: options.configLoader,
   });
+
+  return { config, configFilePath };
+};
+
+const loadSingleProjectConfig = async (
+  options: CommonOptions,
+  root: string,
+): Promise<RslibConfig> => {
+  const { config: loadedConfig, configFilePath } = await loadRawConfig(
+    options,
+    root,
+  );
+
+  if (isWorkspaceConfig(loadedConfig)) {
+    throw new WorkspaceConfigError();
+  }
+
+  const config = loadedConfig as RslibConfig;
 
   if (configFilePath === null) {
     config.lib = [{} satisfies LibConfig];
@@ -128,13 +175,22 @@ const loadConfig = async (options: CommonOptions, root: string) => {
   return config;
 };
 
-export async function init(options: CommonOptions): Promise<RslibInstance> {
-  const cwd = process.cwd();
-  const root = options.root ? ensureAbsolutePath(cwd, options.root) : cwd;
+export const cloneRslibConfig = (config: RslibConfig): RslibConfig => {
+  return mergeRslibConfig(config) as RslibConfig;
+};
 
+export const initWithConfig = async ({
+  options,
+  root,
+  config,
+}: {
+  options: CommonOptions;
+  root: string;
+  config: RslibConfig;
+}): Promise<RslibInstance> => {
   const rslib = await createRslib({
     cwd: root,
-    config: () => loadConfig(options, root),
+    config: cloneRslibConfig(config),
     loadEnv:
       options.env === false
         ? false
@@ -145,4 +201,58 @@ export async function init(options: CommonOptions): Promise<RslibInstance> {
   });
 
   return rslib;
+};
+
+export async function init(options: CommonOptions): Promise<RslibInstance> {
+  const root = resolveCliRoot(options);
+  const rslib = await createRslib({
+    cwd: root,
+    config: () => loadSingleProjectConfig(options, root),
+    loadEnv:
+      options.env === false
+        ? false
+        : {
+            cwd: getEnvDir(root, options.envDir),
+            mode: options.envMode,
+          },
+  });
+  return rslib;
 }
+
+export type WorkspaceInitResult = {
+  root: string;
+  configFilePath: string;
+  config: RslibWorkspaceConfig;
+  projects: ResolvedRslibProject[];
+};
+
+export const initWorkspace = async ({
+  options,
+  includeDependencies,
+}: {
+  options: CommonOptions;
+  includeDependencies?: boolean;
+}): Promise<WorkspaceInitResult | null> => {
+  const root = resolveCliRoot(options);
+  const { config, configFilePath } = await loadRawConfig(options, root);
+
+  if (!configFilePath || !isWorkspaceConfig(config)) {
+    return null;
+  }
+
+  const projects = await resolveWorkspaceProjects({
+    config,
+    cwd: root,
+    envMode: options.envMode,
+    configLoader: options.configLoader,
+    projectFilters: options.project,
+    includeDependencies,
+  });
+
+  return {
+    root,
+    configFilePath,
+    config,
+    projects,
+  };
+};

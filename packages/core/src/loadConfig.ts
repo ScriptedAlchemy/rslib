@@ -4,7 +4,11 @@ import {
   loadConfig as loadRsbuildConfig,
   type LoadConfigOptions as RsbuildLoadConfigOptions,
 } from '@rsbuild/core';
-import type { RslibConfig } from './types';
+import type {
+  RslibConfig,
+  RslibUserConfig,
+  RslibWorkspaceConfig,
+} from './types';
 import { color } from './utils/color';
 import { logger } from './utils/logger';
 
@@ -15,12 +19,14 @@ export type ConfigParams = {
   meta?: Record<string, unknown>;
 };
 
-export type RslibConfigSyncFn = (env: ConfigParams) => RslibConfig;
+export type RslibConfigSyncFn = (env: ConfigParams) => RslibUserConfig;
 
-export type RslibConfigAsyncFn = (env: ConfigParams) => Promise<RslibConfig>;
+export type RslibConfigAsyncFn = (
+  env: ConfigParams,
+) => Promise<RslibUserConfig>;
 
 export type RslibConfigExport =
-  | RslibConfig
+  | RslibUserConfig
   | RslibConfigSyncFn
   | RslibConfigAsyncFn;
 
@@ -35,7 +41,7 @@ export type LoadConfigResult = {
   /**
    * The loaded configuration object.
    */
-  content: RslibConfig;
+  content: RslibUserConfig;
   /**
    * The path to the loaded configuration file.
    * Return `null` if the configuration file is not found.
@@ -48,9 +54,12 @@ export type LoadConfigResult = {
  * It accepts a Rslib config object, or a function that returns a config.
  */
 export function defineConfig(config: RslibConfig): RslibConfig;
+export function defineConfig(
+  config: RslibWorkspaceConfig,
+): RslibWorkspaceConfig;
 export function defineConfig(config: RslibConfigSyncFn): RslibConfigSyncFn;
 export function defineConfig(config: RslibConfigAsyncFn): RslibConfigAsyncFn;
-export function defineConfig(config: RslibConfigExport): RslibConfigExport;
+export function defineConfig<T extends RslibConfigExport>(config: T): T;
 export function defineConfig(config: RslibConfigExport) {
   return config;
 }
@@ -107,7 +116,7 @@ export async function loadConfig({
   if (!configFilePath) {
     logger.debug('no config file found.');
     return {
-      content: {} as RslibConfig,
+      content: {} as RslibUserConfig,
       filePath: null,
     };
   }
@@ -120,7 +129,7 @@ export async function loadConfig({
     loader,
   });
 
-  return { content: content as RslibConfig, filePath: configFilePath };
+  return { content: content as RslibUserConfig, filePath: configFilePath };
 }
 
 export {
