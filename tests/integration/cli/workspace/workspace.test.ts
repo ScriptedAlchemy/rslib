@@ -2185,6 +2185,66 @@ describe('workspace projects', () => {
     expect(stderr).not.toContain('  apps/*  ');
   });
 
+  test('build should deduplicate nested no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.invalidNestedDuplicateNoChildren.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain(
+      'broken/invalid-nested-duplicate-no-children/rslib.config.ts',
+    );
+    expect(stderr).toContain('apps/*');
+    expect(stderr).not.toContain('apps/*, apps/*');
+  });
+
+  test('inspect should deduplicate nested no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.invalidNestedDuplicateNoChildren.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain(
+      'broken/invalid-nested-duplicate-no-children/rslib.config.ts',
+    );
+    expect(stderr).toContain('apps/*');
+    expect(stderr).not.toContain('apps/*, apps/*');
+  });
+
+  test('mf-dev should deduplicate nested no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.invalidNestedDuplicateNoChildren.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain(
+      'broken/invalid-nested-duplicate-no-children/rslib.config.ts',
+    );
+    expect(stderr).toContain('apps/*');
+    expect(stderr).not.toContain('apps/*, apps/*');
+  });
+
   test('should error for nested workspace empty projects array', async () => {
     const fixturePath = __dirname;
 
@@ -2421,6 +2481,42 @@ describe('workspace projects', () => {
 
     const { status, stderr } = runCliSync(
       'build --config rslib.config.noChildProjectsDuplicate.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain('rslib.config.noChildProjectsDuplicate.ts');
+    expect(stderr).toContain('packages/empty/*');
+    expect(stderr).not.toContain('packages/empty/*, packages/empty/*');
+  });
+
+  test('inspect should deduplicate root no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.noChildProjectsDuplicate.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain('rslib.config.noChildProjectsDuplicate.ts');
+    expect(stderr).toContain('packages/empty/*');
+    expect(stderr).not.toContain('packages/empty/*, packages/empty/*');
+  });
+
+  test('mf-dev should deduplicate root no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.noChildProjectsDuplicate.ts',
       {
         cwd: fixturePath,
         stdio: ['ignore', 'ignore', 'pipe'],
