@@ -1260,6 +1260,34 @@ describe('workspace projects resolver', () => {
     ).rejects.toThrowError('/rslib.config.mjs');
   });
 
+  test('normalizes project entries in no-child diagnostics', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
+        config: {
+          projects: ['  packages/empty/*  ', '   '],
+        },
+      }),
+    ).rejects.toThrowError('packages/empty/*');
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
+        config: {
+          projects: ['  packages/empty/*  ', '   '],
+        },
+      }),
+    ).rejects.not.toThrowError('  packages/empty/*  ');
+  });
+
   test('throws when a resolved project has no config file', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,

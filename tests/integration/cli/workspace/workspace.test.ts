@@ -1943,6 +1943,24 @@ describe('workspace projects', () => {
     expect(stderr).toContain('packages/empty/*');
   });
 
+  test('should normalize root no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.trimmedNoChildProjects.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain('rslib.config.trimmedNoChildProjects.ts');
+    expect(stderr).toContain('packages/empty/*');
+    expect(stderr).not.toContain('  packages/empty/*  ');
+  });
+
   test('inspect should error when root projects patterns resolve to no child projects', async () => {
     const fixturePath = __dirname;
 

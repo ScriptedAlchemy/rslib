@@ -217,8 +217,14 @@ const throwNoChildProjectsError = (
   configFilePath?: string,
 ): never => {
   const location = configFilePath ? ` in ${color.cyan(configFilePath)}` : '';
+  const normalizedProjects = projects
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+  const displayedProjects = normalizedProjects.length
+    ? normalizedProjects
+    : projects;
   throw new Error(
-    `No child projects found from workspace projects${location}: ${projects.map((entry) => color.cyan(entry)).join(', ')}.`,
+    `No child projects found from workspace projects${location}: ${displayedProjects.map((entry) => color.cyan(entry)).join(', ')}.`,
   );
 };
 
