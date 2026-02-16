@@ -223,4 +223,24 @@ describe('workspace projects resolver', () => {
       }),
     ).rejects.toThrowError('Circular dependency detected');
   });
+
+  test('throws when projects and lib are used together', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/a',
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+          // @ts-expect-error validate runtime guard for mixed mode
+          lib: [{ format: 'esm' }],
+        },
+      }),
+    ).rejects.toThrowError('cannot be used together');
+  });
 });

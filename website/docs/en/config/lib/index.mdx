@@ -28,6 +28,10 @@ interface RslibConfig extends RsbuildConfig {
 
 - **Default:** `undefined`
 
-- **Required:** `true`
+- **Required:** `true` (single-project mode)
 
 The `lib` configuration is an array of objects, each representing a distinct set of configurations. These include all Rsbuild configurations as well as Rslib-specific configurations, designed to generate different outputs.
+
+:::note
+When using workspace orchestration via [projects](/config/projects), `lib` is defined in each child project config instead of the workspace root config.
+:::
