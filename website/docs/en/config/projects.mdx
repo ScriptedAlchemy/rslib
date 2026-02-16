@@ -38,7 +38,7 @@ When possible, the error message also includes the related config file path to h
 If all project entries resolve to no child projects (for example, an unmatched glob), Rslib throws a `No child projects found from workspace projects` error.
 The error includes the unmatched entry patterns and, when possible, the related config file path.
 The reported entry patterns are normalized by trimming surrounding whitespace.
-If duplicated patterns are provided, the diagnostic output collapses them to unique entries.
+If duplicated patterns are provided, the diagnostic output collapses them to normalized unique entries while preserving first-occurrence order.
 
 The same validation rules apply to nested workspace configs as well.
 If a nested child config is invalid, the error message includes that child config path.

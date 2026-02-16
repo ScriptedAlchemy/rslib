@@ -12,5 +12,5 @@ feat: add workspace `projects` orchestration mode for monorepos
 - add clear errors for unsupported workspace commands (`build --watch`, `mf-dev`)
 - improve workspace config validation diagnostics (invalid `projects` shape and no-child matches include config path context)
 - normalize workspace diagnostics for trimmed `projects` / `--project` values and validate empty negation patterns after `!`
-- deduplicate no-child diagnostic patterns for repeated workspace project entries
+- deduplicate no-child diagnostic patterns for repeated workspace project entries while preserving first-occurrence order
 - deduplicate repeated `--project` filters in filter-miss diagnostics, report normalized filter patterns, and preserve first-occurrence order
