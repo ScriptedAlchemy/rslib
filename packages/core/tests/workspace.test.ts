@@ -1444,6 +1444,55 @@ describe('workspace projects resolver', () => {
     }
   });
 
+  test('resolves deterministic ordering without relying on localeCompare', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/z-lib/package.json': JSON.stringify({
+        name: '@scope/z-lib',
+      }),
+      'packages/z-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/a-lib/package.json': JSON.stringify({
+        name: '@scope/a-lib',
+      }),
+      'packages/a-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const localeCompareDescriptor = Object.getOwnPropertyDescriptor(
+      String.prototype,
+      'localeCompare',
+    );
+    const throwingLocaleCompare = () => {
+      throw new Error('String.prototype.localeCompare should not be called.');
+    };
+
+    Object.defineProperty(String.prototype, 'localeCompare', {
+      configurable: true,
+      writable: true,
+      value: throwingLocaleCompare,
+    });
+
+    try {
+      const projects = await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      });
+
+      expect(projects.map((project) => project.name)).toEqual([
+        '@scope/a-lib',
+        '@scope/z-lib',
+      ]);
+    } finally {
+      if (localeCompareDescriptor) {
+        Object.defineProperty(
+          String.prototype,
+          'localeCompare',
+          localeCompareDescriptor,
+        );
+      }
+    }
+  });
+
   test('throws on duplicated package names', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({
