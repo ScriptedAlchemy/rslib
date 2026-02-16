@@ -165,8 +165,9 @@ const loadSingleProjectConfig = async (
       : undefined;
 
   if (projectsField !== undefined && !Array.isArray(projectsField)) {
+    const location = configFilePath ? ` in ${configFilePath}` : '';
     throw new Error(
-      `Expect "projects" to be a non-empty array in workspace mode.`,
+      `Expect "projects" to be a non-empty array in workspace mode${location}.`,
     );
   }
 

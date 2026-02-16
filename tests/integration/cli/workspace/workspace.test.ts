@@ -363,6 +363,7 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('Expect "projects" to be a non-empty array');
+    expect(stderr).toContain('rslib.config.invalidProjectsType.ts');
   });
 
   test('inspect should error for invalid workspace projects type', async () => {
@@ -378,6 +379,7 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('Expect "projects" to be a non-empty array');
+    expect(stderr).toContain('rslib.config.invalidProjectsType.ts');
   });
 
   test('mf-dev should error for invalid workspace projects type', async () => {
@@ -393,6 +395,23 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('Expect "projects" to be a non-empty array');
+    expect(stderr).toContain('rslib.config.invalidProjectsType.ts');
+  });
+
+  test('should error for invalid nested workspace projects type', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.invalidNestedProjectsType.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('Expect "projects" to be a non-empty array');
+    expect(stderr).toContain('broken/invalid-nested-type/rslib.config.ts');
   });
 
   test('should error for empty workspace projects array', async () => {
