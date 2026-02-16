@@ -781,6 +781,81 @@ describe('workspace projects resolver', () => {
     }
   });
 
+  test('deduplicates normalized filter patterns with undefined root lib in miss diagnostics', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+          // @ts-expect-error validate runtime behavior for explicitly undefined lib
+          lib: undefined,
+        },
+        projectFilters: [
+          '  @scope/missing  ',
+          '@scope/missing',
+          '  !@scope/app  ',
+          '!   @scope/app',
+        ],
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain('No projects found for filters');
+      expect(message).toContain('@scope/missing');
+      expect(message).toContain('!@scope/app');
+      expect(message).toContain('@scope/missing, !@scope/app');
+      expect(message).not.toContain('@scope/missing, @scope/missing');
+      expect(message).not.toContain('!@scope/app, !@scope/app');
+      expect(message).not.toContain('!   @scope/app');
+    }
+  });
+
+  test('deduplicates normalized filter patterns with undefined nested lib in miss diagnostics', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group/rslib.config.mjs': `export default { projects: ['apps/*'], lib: undefined };`,
+      'packages/group/apps/nested/package.json': JSON.stringify({
+        name: '@scope/nested',
+      }),
+      'packages/group/apps/nested/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: [
+          '  @scope/missing  ',
+          '@scope/missing',
+          '  !@scope/nested  ',
+          '!   @scope/nested',
+        ],
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain('No projects found for filters');
+      expect(message).toContain('@scope/missing');
+      expect(message).toContain('!@scope/nested');
+      expect(message).toContain('@scope/missing, !@scope/nested');
+      expect(message).not.toContain('@scope/missing, @scope/missing');
+      expect(message).not.toContain('!@scope/nested, !@scope/nested');
+      expect(message).not.toContain('!   @scope/nested');
+    }
+  });
+
   test('lists available projects in deterministic order on negative-only filter miss', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/z-lib/package.json': JSON.stringify({
