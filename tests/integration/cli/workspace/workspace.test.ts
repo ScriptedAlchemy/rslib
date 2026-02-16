@@ -3700,6 +3700,72 @@ describe('workspace projects', () => {
     expect(stderr).not.toContain('packages/empty/*, packages/empty/*');
   });
 
+  test('build should preserve first-occurrence order for deduplicated root no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.noChildProjectsOrder.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain('rslib.config.noChildProjectsOrder.ts');
+    expect(stderr).toContain('packages/z-empty/*, packages/a-empty/*');
+    expect(stderr).not.toContain('packages/a-empty/*, packages/z-empty/*');
+    expect(stderr).not.toContain(
+      'packages/z-empty/*, packages/a-empty/*, packages/z-empty/*',
+    );
+    expect(stderr).not.toContain('  packages/z-empty/*  ');
+  });
+
+  test('inspect should preserve first-occurrence order for deduplicated root no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.noChildProjectsOrder.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain('rslib.config.noChildProjectsOrder.ts');
+    expect(stderr).toContain('packages/z-empty/*, packages/a-empty/*');
+    expect(stderr).not.toContain('packages/a-empty/*, packages/z-empty/*');
+    expect(stderr).not.toContain(
+      'packages/z-empty/*, packages/a-empty/*, packages/z-empty/*',
+    );
+    expect(stderr).not.toContain('  packages/z-empty/*  ');
+  });
+
+  test('mf-dev should preserve first-occurrence order for deduplicated root no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.noChildProjectsOrder.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain('rslib.config.noChildProjectsOrder.ts');
+    expect(stderr).toContain('packages/z-empty/*, packages/a-empty/*');
+    expect(stderr).not.toContain('packages/a-empty/*, packages/z-empty/*');
+    expect(stderr).not.toContain(
+      'packages/z-empty/*, packages/a-empty/*, packages/z-empty/*',
+    );
+    expect(stderr).not.toContain('  packages/z-empty/*  ');
+  });
+
   test('build should deduplicate undefined-lib root no-child project patterns in diagnostics', async () => {
     const fixturePath = __dirname;
 

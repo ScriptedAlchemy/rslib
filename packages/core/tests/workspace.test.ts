@@ -1761,6 +1761,40 @@ describe('workspace projects resolver', () => {
     }
   });
 
+  test('preserves first-occurrence order when deduplicating no-child project patterns in diagnostics', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
+        config: {
+          projects: [
+            'packages/z-empty/*',
+            'packages/a-empty/*',
+            '  packages/z-empty/*  ',
+          ],
+        },
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain(': packages/z-empty/*, packages/a-empty/*.');
+      expect(message).not.toContain(
+        ': packages/a-empty/*, packages/z-empty/*.',
+      );
+      expect(message).not.toContain(
+        'packages/z-empty/*, packages/a-empty/*, packages/z-empty/*',
+      );
+      expect(message).not.toContain('  packages/z-empty/*  ');
+    }
+  });
+
   test('deduplicates no-child project patterns when root lib is undefined', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/app/package.json': JSON.stringify({
