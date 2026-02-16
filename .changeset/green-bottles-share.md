@@ -17,3 +17,4 @@ feat: add workspace `projects` orchestration mode for monorepos
 - list available workspace projects in filter-miss diagnostics using deterministic sorted order
 - list circular-dependency project names in diagnostics using deterministic sorted order
 - report duplicated package/project-name diagnostics with deterministic sorted config file paths
+- when multiple duplicate-name groups exist, choose a deterministic (lexicographically first) duplicate group in diagnostics
