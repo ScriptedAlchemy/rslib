@@ -220,9 +220,9 @@ const throwNoChildProjectsError = (
   const normalizedProjects = projects
     .map((entry) => entry.trim())
     .filter((entry) => entry.length > 0);
-  const displayedProjects = normalizedProjects.length
-    ? normalizedProjects
-    : projects;
+  const displayedProjects = Array.from(
+    new Set(normalizedProjects.length ? normalizedProjects : projects),
+  );
   throw new Error(
     `No child projects found from workspace projects${location}: ${displayedProjects.map((entry) => color.cyan(entry)).join(', ')}.`,
   );

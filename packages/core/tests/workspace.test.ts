@@ -1336,6 +1336,34 @@ describe('workspace projects resolver', () => {
     ).rejects.toThrowError(': packages/empty/*.');
   });
 
+  test('deduplicates no-child project patterns in diagnostics', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
+        config: {
+          projects: ['packages/empty/*', '  packages/empty/*  '],
+        },
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain(
+        'No child projects found from workspace projects',
+      );
+      expect(message).toContain('packages/empty/*');
+      expect(message).toContain(': packages/empty/*.');
+      expect(message).not.toContain('packages/empty/*, packages/empty/*');
+    }
+  });
+
   test('throws when a resolved project has no config file', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
