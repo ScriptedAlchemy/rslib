@@ -165,4 +165,18 @@ describe('workspace projects', () => {
       'The "mf-dev" command does not support workspace projects mode yet',
     );
   });
+
+  test('mf-dev with --project should still error in workspace mode', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync('mf-dev --project @workspace/app', {
+      cwd: fixturePath,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+
+    expect(status).toBe(1);
+    expect(stderr).toContain(
+      'The "mf-dev" command does not support workspace projects mode yet',
+    );
+  });
 });
