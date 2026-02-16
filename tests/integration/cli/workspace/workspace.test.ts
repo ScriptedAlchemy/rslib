@@ -331,6 +331,7 @@ describe('workspace projects', () => {
 
     expect(status).toBe(1);
     expect(stderr).toContain('cannot be used together');
+    expect(stderr).toContain('rslib.config.mixed.ts');
   });
 
   test('should error for non-string workspace project entries', async () => {
