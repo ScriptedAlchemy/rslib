@@ -1126,6 +1126,14 @@ describe('workspace projects resolver', () => {
           projects: ['packages/*'],
         },
       }),
+    ).rejects.toThrowError(': apps/*.');
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      }),
     ).rejects.toThrowError('/packages/group/rslib.config.mjs');
   });
 
@@ -1317,6 +1325,15 @@ describe('workspace projects resolver', () => {
         },
       }),
     ).rejects.not.toThrowError('  packages/empty/*  ');
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
+        config: {
+          projects: ['  packages/empty/*  ', '   '],
+        },
+      }),
+    ).rejects.toThrowError(': packages/empty/*.');
   });
 
   test('throws when a resolved project has no config file', async () => {
