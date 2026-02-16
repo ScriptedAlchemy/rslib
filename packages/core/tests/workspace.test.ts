@@ -460,6 +460,7 @@ describe('workspace projects resolver', () => {
     await expect(() =>
       resolveWorkspaceProjects({
         cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
         config: {
           projects: ['packages/*'],
           // @ts-expect-error validate runtime guard for mixed mode
@@ -467,6 +468,17 @@ describe('workspace projects resolver', () => {
         },
       }),
     ).rejects.toThrowError('cannot be used together');
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
+        config: {
+          projects: ['packages/*'],
+          // @ts-expect-error validate runtime guard for mixed mode
+          lib: [{ format: 'esm' }],
+        },
+      }),
+    ).rejects.toThrowError('/rslib.config.mjs');
   });
 
   test('throws when projects contains non-string entries', async () => {
@@ -589,11 +601,21 @@ describe('workspace projects resolver', () => {
     await expect(() =>
       resolveWorkspaceProjects({
         cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
         config: {
           projects: ['   ', '\n\t'],
         },
       }),
     ).rejects.toThrowError('to contain at least one non-empty project path');
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
+        config: {
+          projects: ['   ', '\n\t'],
+        },
+      }),
+    ).rejects.toThrowError('/rslib.config.mjs');
   });
 
   test('throws on duplicated fallback project names', async () => {
