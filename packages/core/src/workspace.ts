@@ -107,10 +107,7 @@ const ensureWorkspaceProjectConfig = (
       `Expect ${color.cyan('"projects"')} to contain at least one non-empty project path or glob${location}.`,
     );
   }
-  if (
-    'lib' in config &&
-    Array.isArray((config as Record<string, unknown>).lib)
-  ) {
+  if ('lib' in config) {
     throw new Error(
       `The ${color.cyan('"projects"')} and ${color.cyan('"lib"')} fields cannot be used together in one config${location}. Split them into a workspace config and child project configs.`,
     );
