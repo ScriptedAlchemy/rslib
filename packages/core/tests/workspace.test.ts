@@ -527,6 +527,27 @@ describe('workspace projects resolver', () => {
     ).rejects.toThrowError('to be a non-empty array in workspace mode');
   });
 
+  test('includes config file path in top-level workspace validation errors', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/a',
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: path.join(workspaceRoot, 'rslib.config.ts'),
+        config: {
+          projects: [],
+        },
+      }),
+    ).rejects.toThrowError(
+      `to be a non-empty array in workspace mode in ${path.join(workspaceRoot, 'rslib.config.ts')}`,
+    );
+  });
+
   test('throws when projects only contains empty entries', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({
