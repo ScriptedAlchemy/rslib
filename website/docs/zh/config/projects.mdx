@@ -37,6 +37,9 @@ rslib inspect
 
 如果所有项目项都没有解析出任何子项目（例如 glob 没有匹配到目录），Rslib 会抛出 `No child projects found from workspace projects` 错误。
 
+这些校验规则同样适用于嵌套工作区配置。
+如果嵌套子配置不合法，错误信息会包含该子配置路径。
+
 例如：
 
 ```ts title="rslib.config.ts"
