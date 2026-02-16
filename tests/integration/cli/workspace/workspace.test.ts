@@ -544,6 +544,7 @@ describe('workspace projects', () => {
     expect(stderr).toContain(
       'broken/invalid-nested-no-children/rslib.config.ts',
     );
+    expect(stderr).toContain('apps/*');
   });
 
   test('inspect should error for nested workspace patterns with no child projects', async () => {
@@ -562,6 +563,7 @@ describe('workspace projects', () => {
     expect(stderr).toContain(
       'broken/invalid-nested-no-children/rslib.config.ts',
     );
+    expect(stderr).toContain('apps/*');
   });
 
   test('mf-dev should error for nested workspace patterns with no child projects', async () => {
@@ -580,6 +582,7 @@ describe('workspace projects', () => {
     expect(stderr).toContain(
       'broken/invalid-nested-no-children/rslib.config.ts',
     );
+    expect(stderr).toContain('apps/*');
   });
 
   test('should error for nested workspace empty projects array', async () => {
@@ -792,6 +795,7 @@ describe('workspace projects', () => {
     expect(status).toBe(1);
     expect(stderr).toContain('No child projects found from workspace projects');
     expect(stderr).toContain('rslib.config.noChildProjects.ts');
+    expect(stderr).toContain('packages/empty/*');
   });
 
   test('inspect should error when root projects patterns resolve to no child projects', async () => {
@@ -808,6 +812,7 @@ describe('workspace projects', () => {
     expect(status).toBe(1);
     expect(stderr).toContain('No child projects found from workspace projects');
     expect(stderr).toContain('rslib.config.noChildProjects.ts');
+    expect(stderr).toContain('packages/empty/*');
   });
 
   test('mf-dev should error when root projects patterns resolve to no child projects', async () => {
@@ -824,5 +829,6 @@ describe('workspace projects', () => {
     expect(status).toBe(1);
     expect(stderr).toContain('No child projects found from workspace projects');
     expect(stderr).toContain('rslib.config.noChildProjects.ts');
+    expect(stderr).toContain('packages/empty/*');
   });
 });
