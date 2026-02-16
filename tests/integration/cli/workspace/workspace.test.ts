@@ -413,6 +413,24 @@ describe('workspace projects', () => {
     expect(stderr).not.toContain('cannot be used together');
   });
 
+  test('mf-dev should treat nested undefined-lib workspace config as workspace mode', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.nestedUndefinedLibWorkspace.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain(
+      'The "mf-dev" command does not support workspace projects mode yet',
+    );
+    expect(stderr).not.toContain('cannot be used together');
+  });
+
   test('mf-dev with --project should still error in workspace mode', async () => {
     const fixturePath = __dirname;
 
