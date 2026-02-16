@@ -503,8 +503,9 @@ export async function resolveWorkspaceProjects({
   });
 
   if (!resolvedProjects.length) {
+    const location = configFilePath ? ` in ${color.cyan(configFilePath)}` : '';
     throw new Error(
-      `No child projects found from workspace projects: ${config.projects.map((entry) => color.cyan(entry)).join(', ')}.`,
+      `No child projects found from workspace projects${location}: ${config.projects.map((entry) => color.cyan(entry)).join(', ')}.`,
     );
   }
 

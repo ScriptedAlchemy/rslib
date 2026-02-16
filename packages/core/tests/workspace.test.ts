@@ -734,11 +734,21 @@ describe('workspace projects resolver', () => {
     await expect(() =>
       resolveWorkspaceProjects({
         cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
         config: {
           projects: ['packages/empty/*'],
         },
       }),
     ).rejects.toThrowError('No child projects found from workspace projects');
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
+        config: {
+          projects: ['packages/empty/*'],
+        },
+      }),
+    ).rejects.toThrowError('/rslib.config.mjs');
   });
 
   test('throws when a resolved project has no config file', async () => {
