@@ -214,6 +214,29 @@ describe('workspace projects resolver', () => {
     ]);
   });
 
+  test('includes available project names when filters match nothing', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: ['@scope/missing'],
+      }),
+    ).rejects.toThrowError('Available workspace projects');
+  });
+
   test('throws on duplicated package names', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({

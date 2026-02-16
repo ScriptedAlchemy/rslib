@@ -210,8 +210,11 @@ export const filterProjects = (
   });
 
   if (!filteredProjects.length) {
+    const availableProjectNames = projects
+      .map((project) => project.name)
+      .sort();
     throw new Error(
-      `No projects found for filters: ${projectFilters.map((name) => color.cyan(name)).join(', ')}.`,
+      `No projects found for filters: ${projectFilters.map((name) => color.cyan(name)).join(', ')}. Available workspace projects: ${availableProjectNames.map((name) => color.cyan(name)).join(', ')}.`,
     );
   }
 
