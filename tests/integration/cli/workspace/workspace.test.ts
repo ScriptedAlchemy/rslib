@@ -1776,6 +1776,66 @@ describe('workspace projects', () => {
     expect(stderr).toContain('apps/*');
   });
 
+  test('build should normalize nested no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.invalidNestedTrimmedNoChildren.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain(
+      'broken/invalid-nested-trimmed-no-children/rslib.config.ts',
+    );
+    expect(stderr).toContain('apps/*');
+    expect(stderr).not.toContain('  apps/*  ');
+  });
+
+  test('inspect should normalize nested no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.invalidNestedTrimmedNoChildren.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain(
+      'broken/invalid-nested-trimmed-no-children/rslib.config.ts',
+    );
+    expect(stderr).toContain('apps/*');
+    expect(stderr).not.toContain('  apps/*  ');
+  });
+
+  test('mf-dev should normalize nested no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.invalidNestedTrimmedNoChildren.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain(
+      'broken/invalid-nested-trimmed-no-children/rslib.config.ts',
+    );
+    expect(stderr).toContain('apps/*');
+    expect(stderr).not.toContain('  apps/*  ');
+  });
+
   test('should error for nested workspace empty projects array', async () => {
     const fixturePath = __dirname;
 
