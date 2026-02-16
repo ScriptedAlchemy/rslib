@@ -3352,6 +3352,72 @@ describe('workspace projects', () => {
     expect(stderr).not.toContain('apps/*, apps/*');
   });
 
+  test('build should preserve first-occurrence order for deduplicated nested no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.invalidNestedNoChildProjectsOrder.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain(
+      'broken/invalid-nested-order-no-children/rslib.config.ts',
+    );
+    expect(stderr).toContain('apps-z/*, apps-a/*');
+    expect(stderr).not.toContain('apps-a/*, apps-z/*');
+    expect(stderr).not.toContain('apps-z/*, apps-a/*, apps-z/*');
+    expect(stderr).not.toContain('  apps-z/*  ');
+  });
+
+  test('inspect should preserve first-occurrence order for deduplicated nested no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.invalidNestedNoChildProjectsOrder.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain(
+      'broken/invalid-nested-order-no-children/rslib.config.ts',
+    );
+    expect(stderr).toContain('apps-z/*, apps-a/*');
+    expect(stderr).not.toContain('apps-a/*, apps-z/*');
+    expect(stderr).not.toContain('apps-z/*, apps-a/*, apps-z/*');
+    expect(stderr).not.toContain('  apps-z/*  ');
+  });
+
+  test('mf-dev should preserve first-occurrence order for deduplicated nested no-child project patterns in diagnostics', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.invalidNestedNoChildProjectsOrder.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain(
+      'broken/invalid-nested-order-no-children/rslib.config.ts',
+    );
+    expect(stderr).toContain('apps-z/*, apps-a/*');
+    expect(stderr).not.toContain('apps-a/*, apps-z/*');
+    expect(stderr).not.toContain('apps-z/*, apps-a/*, apps-z/*');
+    expect(stderr).not.toContain('  apps-z/*  ');
+  });
+
   test('build should deduplicate nested undefined-lib no-child project patterns in diagnostics', async () => {
     const fixturePath = __dirname;
 

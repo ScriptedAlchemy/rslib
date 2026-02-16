@@ -1509,6 +1509,28 @@ describe('workspace projects resolver', () => {
     }
   });
 
+  test('preserves first-occurrence order when deduplicating nested no-child project patterns in diagnostics', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group/rslib.config.mjs': `export default { projects: ['apps-z/*', 'apps-a/*', '  apps-z/*  '] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain(': apps-z/*, apps-a/*.');
+      expect(message).not.toContain(': apps-a/*, apps-z/*.');
+      expect(message).not.toContain('apps-z/*, apps-a/*, apps-z/*');
+      expect(message).not.toContain('  apps-z/*  ');
+    }
+  });
+
   test('deduplicates nested no-child project patterns when child lib is undefined', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/group/rslib.config.mjs': `export default { projects: ['apps/*', '  apps/*  '], lib: undefined };`,
