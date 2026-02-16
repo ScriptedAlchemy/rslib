@@ -8,6 +8,12 @@ const removeDistDirs = async (fixturePath: string) => {
     fse.remove(path.join(fixturePath, 'packages/shared/dist')),
     fse.remove(path.join(fixturePath, 'packages/app/dist')),
     fse.remove(path.join(fixturePath, 'packages/group/apps/nested/dist')),
+    fse.remove(
+      path.join(
+        fixturePath,
+        'broken/undefined-lib-workspace/apps/nested-undefined-lib/dist',
+      ),
+    ),
   ]);
 };
 
@@ -105,6 +111,26 @@ describe('workspace projects', () => {
     );
   });
 
+  test('build accepts nested workspace config with undefined lib field', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      'build --config rslib.config.nestedUndefinedLibWorkspace.ts',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(
+      path.join(
+        fixturePath,
+        'broken/undefined-lib-workspace/apps/nested-undefined-lib/dist/index.mjs',
+      ),
+    );
+  });
+
   test('inspect accepts trimmed workspace project entries', async () => {
     const fixturePath = __dirname;
     await removeDistDirs(fixturePath);
@@ -153,6 +179,26 @@ describe('workspace projects', () => {
       path.join(
         fixturePath,
         'packages/group/apps/nested/dist/.rsbuild/rslib.config.mjs',
+      ),
+    );
+  });
+
+  test('inspect accepts nested workspace config with undefined lib field', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      'inspect --config rslib.config.nestedUndefinedLibWorkspace.ts',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(
+      path.join(
+        fixturePath,
+        'broken/undefined-lib-workspace/apps/nested-undefined-lib/dist/.rsbuild/rslib.config.mjs',
       ),
     );
   });

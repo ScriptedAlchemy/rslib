@@ -655,6 +655,28 @@ describe('workspace projects resolver', () => {
     ).rejects.toThrowError('/packages/group/rslib.config.mjs');
   });
 
+  test('allows child workspace config when lib is undefined', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group/rslib.config.mjs': `export default { projects: ['apps/*'], lib: undefined };`,
+      'packages/group/apps/nested/package.json': JSON.stringify({
+        name: '@scope/nested',
+      }),
+      'packages/group/apps/nested/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const projects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: ['packages/*'],
+      },
+    });
+
+    expect(projects).toHaveLength(1);
+    expect(projects[0]).toMatchObject({
+      name: '@scope/nested',
+    });
+  });
+
   test('throws when nested workspace projects array is empty', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/group/rslib.config.mjs': 'export default { projects: [] };',
