@@ -68,6 +68,25 @@ describe('workspace projects', () => {
     ).toBe(false);
   });
 
+  test('supports wildcard and negation filters via --project', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      'build --project @workspace/* --project !@workspace/nested',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(path.join(fixturePath, 'packages/shared/dist/index.mjs'));
+    await expectFile(path.join(fixturePath, 'packages/app/dist/index.mjs'));
+    expect(
+      fse.existsSync(path.join(fixturePath, 'packages/group/apps/nested/dist')),
+    ).toBe(false);
+  });
+
   test('build --watch should error in workspace mode', async () => {
     const fixturePath = __dirname;
 
