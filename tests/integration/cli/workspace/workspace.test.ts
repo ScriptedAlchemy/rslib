@@ -487,6 +487,38 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/shared');
   });
 
+  test('build should error when negation-only filters exclude all projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync('build --project !@workspace/*', {
+      cwd: fixturePath,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/app');
+    expect(stderr).toContain('@workspace/shared');
+    expect(stderr).toContain('@workspace/nested');
+  });
+
+  test('inspect should error when negation-only filters exclude all projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync('inspect --project !@workspace/*', {
+      cwd: fixturePath,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/app');
+    expect(stderr).toContain('@workspace/shared');
+    expect(stderr).toContain('@workspace/nested');
+  });
+
   test('build should error when nested undefined-lib filters exclude all projects', async () => {
     const fixturePath = __dirname;
 
