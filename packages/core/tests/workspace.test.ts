@@ -781,6 +781,43 @@ describe('workspace projects resolver', () => {
     }
   });
 
+  test('preserves first-occurrence order when deduplicating normalized filters in miss diagnostics', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: [
+          '  !@scope/shared  ',
+          '@scope/missing',
+          '!   @scope/shared',
+          '  @scope/missing  ',
+        ],
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain('No projects found for filters');
+      expect(message).toContain('!@scope/shared');
+      expect(message).toContain('@scope/missing');
+      expect(message).toContain('!@scope/shared, @scope/missing');
+      expect(message).not.toContain('@scope/missing, !@scope/shared');
+      expect(message).not.toContain('!   @scope/shared');
+    }
+  });
+
   test('deduplicates normalized negation-only filter patterns in miss diagnostics', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/shared/package.json': JSON.stringify({
