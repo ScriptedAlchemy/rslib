@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 import {
-  type ExecOptions,
-  exec,
+  type SpawnOptionsWithoutStdio,
   type SpawnSyncOptions,
+  spawn,
   spawnSync,
 } from 'node:child_process';
 import fs from 'node:fs';
@@ -47,8 +47,18 @@ export function runCliSync(
   };
 }
 
-export function runCli(command: string, options?: ExecOptions) {
-  const child = exec(`node ${rslibBinPath} ${command}`, options);
+export function runCli(
+  command: string | string[],
+  options?: SpawnOptionsWithoutStdio,
+) {
+  // Note: when `command` is a string, this simple split does not support quoted
+  // arguments with spaces. Use the array form (`string[]`) for such cases.
+  const args = Array.isArray(command)
+    ? command
+    : command.split(' ').filter((arg) => arg.length > 0);
+  const child = spawn('node', [rslibBinPath, ...args], {
+    ...options,
+  });
 
   let stdout = '';
   let stderr = '';
