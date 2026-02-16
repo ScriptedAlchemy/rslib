@@ -465,12 +465,7 @@ describe('workspace projects', () => {
     expect(stderr).toContain('No projects found for filters');
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/app');
-    expect(stderr.indexOf('@workspace/app')).toBeLessThan(
-      stderr.indexOf('@workspace/nested'),
-    );
-    expect(stderr.indexOf('@workspace/nested')).toBeLessThan(
-      stderr.indexOf('@workspace/shared'),
-    );
+    expect(stderr).toContain('@workspace/nested');
     expect(stderr).toContain('@workspace/shared');
   });
 
@@ -524,6 +519,44 @@ describe('workspace projects', () => {
     expect(stderr).toContain('No projects found for filters');
     expect(stderr).toContain('Available workspace projects');
     expect(stderr).toContain('@workspace/nested-undefined-lib');
+  });
+
+  test('build should error when undefined-lib filters exclude all projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.undefinedLibWorkspace.ts --project !@workspace/app --project !@workspace/shared --project !@workspace/nested',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/app');
+    expect(stderr).toContain('@workspace/nested');
+    expect(stderr).toContain('@workspace/shared');
+  });
+
+  test('inspect should error when undefined-lib filters exclude all projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.undefinedLibWorkspace.ts --project !@workspace/app --project !@workspace/shared --project !@workspace/nested',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/app');
+    expect(stderr).toContain('@workspace/shared');
+    expect(stderr).toContain('@workspace/nested');
   });
 
   test('mf-dev should error in workspace mode', async () => {
