@@ -1568,6 +1568,59 @@ describe('workspace projects resolver', () => {
     }
   });
 
+  test('reports all duplicated package config paths in sorted order', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/z/package.json': JSON.stringify({
+        name: '@scope/dup',
+      }),
+      'packages/z/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/m/package.json': JSON.stringify({
+        name: '@scope/dup',
+      }),
+      'packages/m/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/dup',
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      const aConfigPath = path.join(
+        workspaceRoot,
+        'packages/a/rslib.config.mjs',
+      );
+      const mConfigPath = path.join(
+        workspaceRoot,
+        'packages/m/rslib.config.mjs',
+      );
+      const zConfigPath = path.join(
+        workspaceRoot,
+        'packages/z/rslib.config.mjs',
+      );
+      expect(message).toContain(aConfigPath);
+      expect(message).toContain(mConfigPath);
+      expect(message).toContain(zConfigPath);
+      const duplicateMessage = message.slice(
+        message.indexOf('Duplicated package name'),
+      );
+      expect(duplicateMessage.indexOf(aConfigPath)).toBeLessThan(
+        duplicateMessage.indexOf(mConfigPath),
+      );
+      expect(duplicateMessage.indexOf(mConfigPath)).toBeLessThan(
+        duplicateMessage.indexOf(zConfigPath),
+      );
+    }
+  });
+
   test('throws on circular dependencies', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({
@@ -2214,6 +2267,50 @@ describe('workspace projects resolver', () => {
       const message = (error as Error).message;
       expect(message).toContain('Duplicated workspace project name common');
       expect(message).not.toContain('Duplicated workspace project name shared');
+    }
+  });
+
+  test('reports all duplicated fallback project config paths in sorted order', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group-z/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/group-m/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/group-a/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/**/common'],
+        },
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      const aConfigPath = path.join(
+        workspaceRoot,
+        'packages/group-a/common/rslib.config.mjs',
+      );
+      const mConfigPath = path.join(
+        workspaceRoot,
+        'packages/group-m/common/rslib.config.mjs',
+      );
+      const zConfigPath = path.join(
+        workspaceRoot,
+        'packages/group-z/common/rslib.config.mjs',
+      );
+      expect(message).toContain(aConfigPath);
+      expect(message).toContain(mConfigPath);
+      expect(message).toContain(zConfigPath);
+      const duplicateMessage = message.slice(
+        message.indexOf('Duplicated workspace project name'),
+      );
+      expect(duplicateMessage.indexOf(aConfigPath)).toBeLessThan(
+        duplicateMessage.indexOf(mConfigPath),
+      );
+      expect(duplicateMessage.indexOf(mConfigPath)).toBeLessThan(
+        duplicateMessage.indexOf(zConfigPath),
+      );
     }
   });
 
