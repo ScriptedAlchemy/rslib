@@ -1342,6 +1342,64 @@ describe('workspace projects resolver', () => {
     }
   });
 
+  test('lists available projects in deterministic order on negative-only filter miss with nested workspace projects', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group/rslib.config.mjs': `export default { projects: ['apps/*'] };`,
+      'packages/group/apps/z-lib/package.json': JSON.stringify({
+        name: '@scope/z-lib',
+      }),
+      'packages/group/apps/z-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/group/apps/a-lib/package.json': JSON.stringify({
+        name: '@scope/a-lib',
+      }),
+      'packages/group/apps/a-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: ['!@scope/a-lib', '!@scope/z-lib'],
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      expect((error as Error).message).toContain(
+        'Available workspace projects: @scope/a-lib, @scope/z-lib',
+      );
+    }
+  });
+
+  test('lists available projects in deterministic order on negative-only filter miss with undefined nested workspace lib', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group/rslib.config.mjs': `export default { projects: ['apps/*'], lib: undefined };`,
+      'packages/group/apps/z-lib/package.json': JSON.stringify({
+        name: '@scope/z-lib',
+      }),
+      'packages/group/apps/z-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/group/apps/a-lib/package.json': JSON.stringify({
+        name: '@scope/a-lib',
+      }),
+      'packages/group/apps/a-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+        projectFilters: ['!@scope/a-lib', '!@scope/z-lib'],
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      expect((error as Error).message).toContain(
+        'Available workspace projects: @scope/a-lib, @scope/z-lib',
+      );
+    }
+  });
+
   test('throws on duplicated package names', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({
