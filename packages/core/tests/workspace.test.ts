@@ -1577,6 +1577,79 @@ describe('workspace projects resolver', () => {
     });
   });
 
+  test('reports filter-miss diagnostics without relying on localeCompare', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/z-lib/package.json': JSON.stringify({
+        name: '@scope/z-lib',
+      }),
+      'packages/z-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/a-lib/package.json': JSON.stringify({
+        name: '@scope/a-lib',
+      }),
+      'packages/a-lib/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await withThrowingLocaleCompare(async () => {
+      try {
+        await resolveWorkspaceProjects({
+          cwd: workspaceRoot,
+          config: {
+            projects: ['packages/*'],
+          },
+          projectFilters: ['@scope/missing'],
+        });
+        throw new Error('Expected resolveWorkspaceProjects to throw.');
+      } catch (error) {
+        const message = (error as Error).message;
+        expect(message).toContain(
+          'No projects found for filters: @scope/missing',
+        );
+        expect(message).toContain(
+          'Available workspace projects: @scope/a-lib, @scope/z-lib',
+        );
+      }
+    });
+  });
+
+  test('reports circular dependency diagnostics without relying on localeCompare', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/z/package.json': JSON.stringify({
+        name: '@scope/z',
+        dependencies: {
+          '@scope/a': 'workspace:*',
+        },
+      }),
+      'packages/z/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/a',
+        dependencies: {
+          '@scope/z': 'workspace:*',
+        },
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await withThrowingLocaleCompare(async () => {
+      try {
+        await resolveWorkspaceProjects({
+          cwd: workspaceRoot,
+          config: {
+            projects: ['packages/z', 'packages/a'],
+          },
+        });
+        throw new Error('Expected resolveWorkspaceProjects to throw.');
+      } catch (error) {
+        const message = (error as Error).message;
+        expect(message).toContain(
+          'Circular dependency detected in workspace projects',
+        );
+        expect(message).toContain(
+          'Circular dependency detected in workspace projects: @scope/a, @scope/z',
+        );
+      }
+    });
+  });
+
   test('throws on duplicated package names', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({
