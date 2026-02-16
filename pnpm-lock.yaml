@@ -22,7 +22,7 @@ importers:
         version: 0.2.1
       '@rstest/adapter-rslib':
         specifier: ^0.2.0
-        version: 0.2.0(@rslib/core@0.19.5(@microsoft/api-extractor@7.56.3(@types/node@24.10.13))(typescript@5.9.3))(@rstest/core@0.8.5)(typescript@5.9.3)
+        version: 0.2.0(@rslib/core@0.19.6(@microsoft/api-extractor@7.56.3(@types/node@24.10.13))(typescript@5.9.3))(@rstest/core@0.8.5)(typescript@5.9.3)
       '@rstest/core':
         specifier: ^0.8.5
         version: 0.8.5
@@ -713,6 +713,18 @@ importers:
   tests/integration/cli/mf/dev: {}
 
   tests/integration/cli/mf/dev-error: {}
+
+  tests/integration/cli/workspace: {}
+
+  tests/integration/cli/workspace/packages/app:
+    dependencies:
+      '@workspace/shared':
+        specifier: workspace:*
+        version: link:../shared
+
+  tests/integration/cli/workspace/packages/group/apps/nested: {}
+
+  tests/integration/cli/workspace/packages/shared: {}
 
   tests/integration/config-check/lib-array: {}
 
@@ -2900,6 +2912,19 @@ packages:
 
   '@rslib/core@0.19.5':
     resolution: {integrity: sha512-ptpO0ZQcWTIjHq4QT9K5YTnlI792EOUlUMwXhbhEoDmiKN5q7FhQSRrCGmoWBe0Mv9s+r3bmZ7YzjmcB6Oxbuw==}
+    engines: {node: '>=18.12.0'}
+    hasBin: true
+    peerDependencies:
+      '@microsoft/api-extractor': ^7
+      typescript: ^5
+    peerDependenciesMeta:
+      '@microsoft/api-extractor':
+        optional: true
+      typescript:
+        optional: true
+
+  '@rslib/core@0.19.6':
+    resolution: {integrity: sha512-/znUZlPX252DhAf2WvzmkZ2rBi85d8TadkABYvWoUGAVGsmFOiX+anDwLOqQ+7m5KsMFzM/SCqB2yEBvAj/T2g==}
     engines: {node: '>=18.12.0'}
     hasBin: true
     peerDependencies:
@@ -6763,6 +6788,22 @@ packages:
       typescript:
         optional: true
 
+  rsbuild-plugin-dts@0.19.6:
+    resolution: {integrity: sha512-ehD3P432VJq6djxfAdWeWSUXPhEAnISlma2EXOSCZSzjerzRrG4H4f6WWw1sxN5qMQXgu5hLPqlUHsFZM9sEIg==}
+    engines: {node: '>=18.12.0'}
+    peerDependencies:
+      '@microsoft/api-extractor': ^7
+      '@rsbuild/core': 1.x
+      '@typescript/native-preview': 7.x
+      typescript: ^5
+    peerDependenciesMeta:
+      '@microsoft/api-extractor':
+        optional: true
+      '@typescript/native-preview':
+        optional: true
+      typescript:
+        optional: true
+
   rsbuild-plugin-google-analytics@1.0.5:
     resolution: {integrity: sha512-1qSMjmH3HBNMIyrRjBFHQKmTdL86VNc42HjL3z25z4k4n+N7+cl9UvpD5ou3G6YAn1jNJ2GS2pia+PKNyaTzmg==}
     peerDependencies:
@@ -9675,6 +9716,16 @@ snapshots:
     transitivePeerDependencies:
       - '@typescript/native-preview'
 
+  '@rslib/core@0.19.6(@microsoft/api-extractor@7.56.3(@types/node@24.10.13))(typescript@5.9.3)':
+    dependencies:
+      '@rsbuild/core': 1.7.3
+      rsbuild-plugin-dts: 0.19.6(@microsoft/api-extractor@7.56.3(@types/node@24.10.13))(@rsbuild/core@1.7.3)(typescript@5.9.3)
+    optionalDependencies:
+      '@microsoft/api-extractor': 7.56.3(@types/node@24.10.13)
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - '@typescript/native-preview'
+
   '@rslint/core@0.2.1':
     optionalDependencies:
       '@rslint/darwin-arm64': 0.2.1
@@ -9939,9 +9990,9 @@ snapshots:
       - react
       - react-dom
 
-  '@rstest/adapter-rslib@0.2.0(@rslib/core@0.19.5(@microsoft/api-extractor@7.56.3(@types/node@24.10.13))(typescript@5.9.3))(@rstest/core@0.8.5)(typescript@5.9.3)':
+  '@rstest/adapter-rslib@0.2.0(@rslib/core@0.19.6(@microsoft/api-extractor@7.56.3(@types/node@24.10.13))(typescript@5.9.3))(@rstest/core@0.8.5)(typescript@5.9.3)':
     dependencies:
-      '@rslib/core': 0.19.5(@microsoft/api-extractor@7.56.3(@types/node@24.10.13))(typescript@5.9.3)
+      '@rslib/core': 0.19.6(@microsoft/api-extractor@7.56.3(@types/node@24.10.13))(typescript@5.9.3)
       '@rstest/core': 0.8.5
     optionalDependencies:
       typescript: 5.9.3
@@ -14262,6 +14313,14 @@ snapshots:
     optionalDependencies:
       '@microsoft/api-extractor': 7.56.3(@types/node@25.2.0)
       '@typescript/native-preview': 7.0.0-dev.20260213.1
+      typescript: 5.9.3
+
+  rsbuild-plugin-dts@0.19.6(@microsoft/api-extractor@7.56.3(@types/node@24.10.13))(@rsbuild/core@1.7.3)(typescript@5.9.3):
+    dependencies:
+      '@ast-grep/napi': 0.37.0
+      '@rsbuild/core': 1.7.3
+    optionalDependencies:
+      '@microsoft/api-extractor': 7.56.3(@types/node@24.10.13)
       typescript: 5.9.3
 
   rsbuild-plugin-google-analytics@1.0.5(@rsbuild/core@1.7.3):

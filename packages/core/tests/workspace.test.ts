@@ -1,0 +1,166 @@
+import os from 'node:os';
+import path from 'node:path';
+import { afterEach, describe, expect, test } from '@rstest/core';
+import fse from 'fs-extra';
+import { resolveWorkspaceProjects } from '../src/workspace';
+
+const tempDirs: string[] = [];
+
+const createWorkspace = async (files: Record<string, string>) => {
+  const root = await fse.mkdtemp(path.join(os.tmpdir(), 'rslib-workspace-'));
+  tempDirs.push(root);
+
+  await Promise.all(
+    Object.entries(files).map(async ([relativePath, content]) => {
+      const filePath = path.join(root, relativePath);
+      await fse.outputFile(filePath, content);
+    }),
+  );
+
+  return root;
+};
+
+afterEach(async () => {
+  await Promise.all(tempDirs.splice(0).map((tempDir) => fse.remove(tempDir)));
+});
+
+describe('workspace projects resolver', () => {
+  test('resolves workspace projects and sorts by dependency order', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+        dependencies: {
+          '@scope/shared': 'workspace:*',
+        },
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const projects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: ['packages/*'],
+      },
+    });
+
+    expect(projects.map((project) => project.name)).toEqual([
+      '@scope/shared',
+      '@scope/app',
+    ]);
+    expect(projects[1]?.dependencies).toEqual(['@scope/shared']);
+  });
+
+  test('supports nested workspace projects', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group/rslib.config.mjs': `export default { projects: ['apps/*'] };`,
+      'packages/group/apps/nested/package.json': JSON.stringify({
+        name: '@scope/nested',
+      }),
+      'packages/group/apps/nested/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const projects = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: ['packages/*'],
+      },
+    });
+
+    expect(projects.map((project) => project.name)).toEqual(['@scope/nested']);
+  });
+
+  test('filters projects and can include local dependencies', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/shared/package.json': JSON.stringify({
+        name: '@scope/shared',
+      }),
+      'packages/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/app/package.json': JSON.stringify({
+        name: '@scope/app',
+        dependencies: {
+          '@scope/shared': 'workspace:*',
+        },
+      }),
+      'packages/app/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    const filteredOnly = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: ['packages/*'],
+      },
+      projectFilters: ['@scope/app'],
+      includeDependencies: false,
+    });
+
+    expect(filteredOnly.map((project) => project.name)).toEqual(['@scope/app']);
+
+    const filteredWithDependencies = await resolveWorkspaceProjects({
+      cwd: workspaceRoot,
+      config: {
+        projects: ['packages/*'],
+      },
+      projectFilters: ['@scope/app'],
+      includeDependencies: true,
+    });
+
+    expect(filteredWithDependencies.map((project) => project.name)).toEqual([
+      '@scope/shared',
+      '@scope/app',
+    ]);
+  });
+
+  test('throws on duplicated package names', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/dup',
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/b/package.json': JSON.stringify({
+        name: '@scope/dup',
+      }),
+      'packages/b/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      }),
+    ).rejects.toThrowError('Duplicated package name');
+  });
+
+  test('throws on circular dependencies', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/a',
+        dependencies: {
+          '@scope/b': 'workspace:*',
+        },
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/b/package.json': JSON.stringify({
+        name: '@scope/b',
+        dependencies: {
+          '@scope/a': 'workspace:*',
+        },
+      }),
+      'packages/b/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: ['packages/*'],
+        },
+      }),
+    ).rejects.toThrowError('Circular dependency detected');
+  });
+});
