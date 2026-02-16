@@ -661,6 +661,7 @@ describe('workspace projects', () => {
     expect(stderr).toContain('No projects found for filters');
     expect(stderr).toContain('@workspace/missing');
     expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).not.toContain('!   @workspace/shared');
   });
 
   test('inspect should error when --project filters exclude all projects', async () => {
@@ -749,6 +750,7 @@ describe('workspace projects', () => {
     expect(stderr).toContain('No projects found for filters');
     expect(stderr).toContain('@workspace/missing');
     expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).not.toContain('!   @workspace/shared');
   });
 
   test('build should error when undefined-lib mixed project filters match nothing', async () => {
@@ -1202,6 +1204,7 @@ describe('workspace projects', () => {
     expect(stderr).toContain('No projects found for filters');
     expect(stderr).toContain('@workspace/missing');
     expect(stderr).toContain('!@workspace/shared');
+    expect(stderr).not.toContain('!   @workspace/shared');
   });
 
   test('mf-dev should error when undefined-lib mixed project filters match nothing', async () => {
