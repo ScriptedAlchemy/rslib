@@ -477,6 +477,54 @@ describe('workspace projects', () => {
     expect(stderr).toContain('rslib.config.mixedInvalidLib.ts');
   });
 
+  test('should error for mixed workspace and null lib root config', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'build --config rslib.config.mixedNullLib.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('cannot be used together');
+    expect(stderr).toContain('rslib.config.mixedNullLib.ts');
+  });
+
+  test('inspect should error for mixed workspace and null lib root config', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.mixedNullLib.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('cannot be used together');
+    expect(stderr).toContain('rslib.config.mixedNullLib.ts');
+  });
+
+  test('mf-dev should error for mixed workspace and null lib root config', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.mixedNullLib.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('cannot be used together');
+    expect(stderr).toContain('rslib.config.mixedNullLib.ts');
+  });
+
   test('should error for non-string workspace project entries', async () => {
     const fixturePath = __dirname;
 

@@ -547,6 +547,27 @@ describe('workspace projects resolver', () => {
     });
   });
 
+  test('throws when projects and null lib are used together', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/a/package.json': JSON.stringify({
+        name: '@scope/a',
+      }),
+      'packages/a/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    await expect(() =>
+      resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        configFilePath: `${workspaceRoot}/rslib.config.mjs`,
+        config: {
+          projects: ['packages/*'],
+          // @ts-expect-error validate runtime guard for malformed mixed mode
+          lib: null,
+        },
+      }),
+    ).rejects.toThrowError('cannot be used together');
+  });
+
   test('throws when projects contains non-string entries', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({
