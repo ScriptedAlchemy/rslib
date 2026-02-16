@@ -150,6 +150,32 @@ describe('workspace projects', () => {
     );
   });
 
+  test('build --project works with nested undefined-lib workspace config', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      'build --config rslib.config.nestedUndefinedLibWorkspace.ts --project @workspace/nested-undefined-lib',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(
+      path.join(
+        fixturePath,
+        'broken/undefined-lib-workspace/apps/nested-undefined-lib/dist/index.mjs',
+      ),
+    );
+    expect(fse.existsSync(path.join(fixturePath, 'packages/shared/dist'))).toBe(
+      false,
+    );
+    expect(fse.existsSync(path.join(fixturePath, 'packages/app/dist'))).toBe(
+      false,
+    );
+  });
+
   test('inspect accepts trimmed workspace project entries', async () => {
     const fixturePath = __dirname;
     await removeDistDirs(fixturePath);
@@ -253,6 +279,39 @@ describe('workspace projects', () => {
         'broken/undefined-lib-workspace/apps/nested-undefined-lib/dist/.rsbuild/rslib.config.mjs',
       ),
     );
+  });
+
+  test('inspect --project works with nested undefined-lib workspace config', async () => {
+    const fixturePath = __dirname;
+    await removeDistDirs(fixturePath);
+
+    const { status } = runCliSync(
+      'inspect --config rslib.config.nestedUndefinedLibWorkspace.ts --project @workspace/nested-undefined-lib',
+      {
+        cwd: fixturePath,
+      },
+    );
+
+    expect(status).toBe(0);
+    await expectFile(
+      path.join(
+        fixturePath,
+        'broken/undefined-lib-workspace/apps/nested-undefined-lib/dist/.rsbuild/rslib.config.mjs',
+      ),
+    );
+    expect(
+      fse.existsSync(
+        path.join(
+          fixturePath,
+          'packages/shared/dist/.rsbuild/rslib.config.mjs',
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      fse.existsSync(
+        path.join(fixturePath, 'packages/app/dist/.rsbuild/rslib.config.mjs'),
+      ),
+    ).toBe(false);
   });
 
   test('inspect --project works with workspace root config', async () => {
