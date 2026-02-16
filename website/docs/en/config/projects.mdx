@@ -49,6 +49,7 @@ In workspace mode, `rslib build` builds projects in dependency order.
 
 Rslib infers local dependencies from each child project's `package.json` and sorts projects topologically before building.  
 If a circular dependency is detected, Rslib throws an error.
+For independent projects without dependency relationships, Rslib uses a deterministic order.
 
 ## Project filtering
 
