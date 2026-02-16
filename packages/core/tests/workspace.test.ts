@@ -1528,6 +1528,46 @@ describe('workspace projects resolver', () => {
     ).rejects.toThrowError('Duplicated package name');
   });
 
+  test('selects lexicographically first duplicated package name when multiple groups conflict', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/z-one/package.json': JSON.stringify({
+        name: '@scope/z-dup',
+      }),
+      'packages/z-one/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/z-two/package.json': JSON.stringify({
+        name: '@scope/z-dup',
+      }),
+      'packages/z-two/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/a-one/package.json': JSON.stringify({
+        name: '@scope/a-dup',
+      }),
+      'packages/a-one/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/a-two/package.json': JSON.stringify({
+        name: '@scope/a-dup',
+      }),
+      'packages/a-two/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: [
+            'packages/z-one',
+            'packages/z-two',
+            'packages/a-one',
+            'packages/a-two',
+          ],
+        },
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain('@scope/a-dup');
+      expect(message).not.toContain('@scope/z-dup');
+    }
+  });
+
   test('throws on circular dependencies', async () => {
     const workspaceRoot = await createWorkspace({
       'packages/a/package.json': JSON.stringify({
@@ -2129,6 +2169,34 @@ describe('workspace projects resolver', () => {
       expect(message.indexOf(aConfigPath)).toBeLessThan(
         message.indexOf(zConfigPath),
       );
+    }
+  });
+
+  test('selects lexicographically first duplicated fallback project name when multiple groups conflict', async () => {
+    const workspaceRoot = await createWorkspace({
+      'packages/group-z/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/group-y/shared/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/group-b/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+      'packages/group-a/common/rslib.config.mjs': `export default { lib: [{ format: 'esm' }] };`,
+    });
+
+    try {
+      await resolveWorkspaceProjects({
+        cwd: workspaceRoot,
+        config: {
+          projects: [
+            'packages/group-z/shared',
+            'packages/group-y/shared',
+            'packages/group-b/common',
+            'packages/group-a/common',
+          ],
+        },
+      });
+      throw new Error('Expected resolveWorkspaceProjects to throw.');
+    } catch (error) {
+      const message = (error as Error).message;
+      expect(message).toContain('Duplicated workspace project name common');
+      expect(message).not.toContain('Duplicated workspace project name shared');
     }
   });
 
