@@ -691,4 +691,36 @@ describe('workspace projects', () => {
     expect(stderr).toContain('No child projects found from workspace projects');
     expect(stderr).toContain('rslib.config.noChildProjects.ts');
   });
+
+  test('inspect should error when root projects patterns resolve to no child projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'inspect --config rslib.config.noChildProjects.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain('rslib.config.noChildProjects.ts');
+  });
+
+  test('mf-dev should error when root projects patterns resolve to no child projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.noChildProjects.ts',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No child projects found from workspace projects');
+    expect(stderr).toContain('rslib.config.noChildProjects.ts');
+  });
 });
