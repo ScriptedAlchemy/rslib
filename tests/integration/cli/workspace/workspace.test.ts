@@ -748,6 +748,61 @@ describe('workspace projects', () => {
     expect(stderr).toContain('@workspace/nested-undefined-lib');
   });
 
+  test('mf-dev should error when --project filters exclude all projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --project !@workspace/app --project !@workspace/shared --project !@workspace/nested',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/app');
+    expect(stderr).toContain('@workspace/shared');
+    expect(stderr).toContain('@workspace/nested');
+  });
+
+  test('mf-dev should error when undefined-lib --project filters exclude all projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.undefinedLibWorkspace.ts --project !@workspace/app --project !@workspace/shared --project !@workspace/nested',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/app');
+    expect(stderr).toContain('@workspace/shared');
+    expect(stderr).toContain('@workspace/nested');
+  });
+
+  test('mf-dev should error when nested undefined-lib --project filters exclude all projects', async () => {
+    const fixturePath = __dirname;
+
+    const { status, stderr } = runCliSync(
+      'mf-dev --config rslib.config.nestedUndefinedLibWorkspace.ts --project !@workspace/nested-undefined-lib',
+      {
+        cwd: fixturePath,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    );
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('No projects found for filters');
+    expect(stderr).toContain('Available workspace projects');
+    expect(stderr).toContain('@workspace/nested-undefined-lib');
+  });
+
   test('should error for mixed workspace and lib root config', async () => {
     const fixturePath = __dirname;
 
